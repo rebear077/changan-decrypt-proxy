@@ -1,0 +1,17 @@
+[Mysql]
+MslUrl="127.0.0.1:3306"
+MslUsername="root"
+MslPasswd="123456"
+MslName="db0"
+MslProtocol="tcp"
+
+[LogDB]
+LogDBUrl="127.0.0.1:3306"
+LogDBUsername="root"
+LogDBPasswd="123456"
+LogDBName="selflog_test"
+LogDBProtocol="tcp"
+
+
+[log]
+Path="./"
