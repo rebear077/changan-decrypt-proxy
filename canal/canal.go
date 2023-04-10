@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/FISCO-BCOS/go-sdk/conf"
 	queue "github.com/FISCO-BCOS/go-sdk/structure"
 	types "github.com/FISCO-BCOS/go-sdk/type"
 	"github.com/golang/protobuf/proto"
@@ -35,8 +36,13 @@ type Connector struct {
 }
 
 func NewConnector(table string) *Connector {
-	connector := client.NewSimpleCanalConnector("127.0.0.1", 11111, "canal", "canal", "example", 60000, 60*60*1000)
-	err := connector.Connect()
+	configs, err := conf.ParseConfigFile("./configs/config.toml")
+	if err != nil {
+		logrus.Fatalln(err)
+	}
+	config := &configs[0]
+	connector := client.NewSimpleCanalConnector(config.CanalIP, config.CanalPort, config.CanalUsername, config.CanalPassword, config.CanalDestination, 60000, 60*60*1000)
+	err = connector.Connect()
 	if err != nil {
 		logrus.Errorln(err)
 		os.Exit(1)

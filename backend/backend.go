@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/FISCO-BCOS/go-sdk/canal"
+	"github.com/FISCO-BCOS/go-sdk/conf"
 	"github.com/FISCO-BCOS/go-sdk/redis"
 	sql "github.com/FISCO-BCOS/go-sdk/sqlController"
 	types "github.com/FISCO-BCOS/go-sdk/type"
@@ -24,13 +25,19 @@ type Server struct {
 
 // 初始化
 func NewServer() *Server {
+	configs, err := conf.ParseConfigFile("./configs/config.toml")
+	if err != nil {
+		logrus.Fatalln(err)
+	}
+	config := &configs[0]
 	sqlCtr := sql.NewSqlCtr()
 	invoice := redis.NewRedisOperator(0)
 	historyTX := redis.NewRedisOperator(1)
 	enterpool := redis.NewRedisOperator(2)
 	financingIntention := redis.NewRedisOperator(3)
 	collectAccount := redis.NewRedisOperator(4)
-	canal := canal.NewConnector("db0\\.u_t.*")
+	// canal := canal.NewConnector("db0\\.u_t.*")
+	canal := canal.NewConnector(config.CanalConnectedDB + "\\.u_t.*")
 	return &Server{
 		sql:                     sqlCtr,
 		redisInvoice:            invoice,

@@ -12,28 +12,34 @@ import (
 
 // Config contains configuration items for sdk
 type Config struct {
-	IsHTTP         bool
-	ChainID        int64
-	CAFile         string
-	TLSCAContext   []byte
-	Key            string
-	TLSKeyContext  []byte
-	Cert           string
-	TLSCertContext []byte
-	IsSMCrypto     bool
-	PrivateKey     []byte
-	GroupID        int
-	NodeURL        string
-	MslUrl         string
-	MslUsername    string
-	MslPasswd      string
-	MslName        string
-	MslProtocol    string
-	LogDBUrl       string
-	LogDBUsername  string
-	LogDBPasswd    string
-	LogDBName      string
-	LogDBProtocol  string
+	IsHTTP           bool
+	ChainID          int64
+	CAFile           string
+	TLSCAContext     []byte
+	Key              string
+	TLSKeyContext    []byte
+	Cert             string
+	TLSCertContext   []byte
+	IsSMCrypto       bool
+	PrivateKey       []byte
+	GroupID          int
+	NodeURL          string
+	MslUrl           string
+	MslUsername      string
+	MslPasswd        string
+	MslName          string
+	MslProtocol      string
+	LogDBUrl         string
+	LogDBUsername    string
+	LogDBPasswd      string
+	LogDBName        string
+	LogDBProtocol    string
+	CanalIP          string
+	CanalPort        int
+	CanalUsername    string
+	CanalPassword    string
+	CanalDestination string
+	CanalConnectedDB string
 }
 
 // ParseConfigFile parses the configuration from toml config file
@@ -88,6 +94,14 @@ func ParseConfig(buffer []byte) ([]Config, error) {
 		config.LogDBPasswd = viper.GetString("LogDB.LogDBPasswd")
 		config.LogDBName = viper.GetString("LogDB.LogDBName")
 		config.LogDBProtocol = viper.GetString("LogDB.LogDBProtocol")
+	}
+	if viper.IsSet("Canal") {
+		config.CanalIP = viper.GetString("Canal.CanalIP")
+		config.CanalPort = viper.GetInt("Canal.CanalPort")
+		config.CanalUsername = viper.GetString("Canal.CanalUsername")
+		config.CanalPassword = viper.GetString("Canal.CanalPassword")
+		config.CanalDestination = viper.GetString("Canal.CanalDestination")
+		config.CanalConnectedDB = viper.GetString("Canal.CanalConnectedDB")
 	}
 	configs = append(configs, *config)
 	return configs, nil

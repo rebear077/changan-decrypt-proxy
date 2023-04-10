@@ -12,6 +12,14 @@ LogDBPasswd="123456"
 LogDBName="selflog_test"
 LogDBProtocol="tcp"
 
+[Canal]
+CanalIP="127.0.0.1"
+CanalPort=11111
+CanalUsername="canal"
+CanalPassword="canal"
+CanalDestination="example"
+CanalConnectedDB="db0"
+
 
 [log]
 Path="./"
