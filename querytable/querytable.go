@@ -2,16 +2,20 @@ package querytable
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/http/cookiejar"
 	"strconv"
 	"strings"
 
 	server "github.com/FISCO-BCOS/go-sdk/backend"
 	"github.com/FISCO-BCOS/go-sdk/proxy"
 	sql "github.com/FISCO-BCOS/go-sdk/sqlController"
+	types "github.com/FISCO-BCOS/go-sdk/type"
+	"github.com/sirupsen/logrus"
 )
 
 type FrontEnd struct {
@@ -20,8 +24,42 @@ type FrontEnd struct {
 
 func NewFrontEnd() *FrontEnd {
 	server := server.NewServer()
+
 	return &FrontEnd{
 		Server: server,
+	}
+}
+func (front *FrontEnd) DecryptSelectToApplicationInformation(writer http.ResponseWriter, request *http.Request) {
+	var message types.SelectedInfoToApplication
+	if json.NewDecoder(request.Body).Decode(&message) != nil {
+		jsonData := wrongJsonType()
+		fmt.Fprint(writer, jsonData)
+	} else {
+		if !verifyConsistency(message) {
+			jsonData := unconsistencyCode()
+			fmt.Fprint(writer, jsonData)
+		} else {
+			targetURL := "https://127.0.0.1:8443/asl/universal/selected-to-application"
+			targetJSON, err := json.Marshal(message)
+			if err != nil {
+				logrus.Errorln(err)
+				jsonData := failedCode()
+				fmt.Fprint(writer, jsonData)
+				return
+			}
+			fmt.Println(string(targetJSON))
+			response := handle(targetURL, string(targetJSON))
+			jsonData, err := json.Marshal(response)
+			if err != nil {
+				logrus.Errorln(err)
+				jsonData := failedCode()
+				fmt.Fprint(writer, jsonData)
+				return
+			}
+			fmt.Println("收到回执", string(jsonData))
+			fmt.Fprint(writer, jsonData)
+		}
+
 	}
 }
 func (front *FrontEnd) DecryptInvoiceInformation(writer http.ResponseWriter, request *http.Request) {
@@ -107,10 +145,49 @@ func (front *FrontEnd) DecryptAccountInformation(writer http.ResponseWriter, req
 	jsonData := front.Server.PackToAccountJson(accounts, totalcount, currentPage)
 	fmt.Fprint(writer, jsonData)
 }
+
+// 接口，负责发送勾选数据至其他服务端
+func handle(targetUrl string, targetJson string) SucessCode {
+	targetData := []byte(targetJson)
+	reader := bytes.NewReader(targetData)
+	var resp *http.Response
+	var data []byte
+	tr := &http.Transport{
+		TLSClientConfig:    &tls.Config{InsecureSkipVerify: true},
+		DisableCompression: true,
+	}
+	client := &http.Client{Transport: tr}
+	// 获取 request请求
+	request, err := http.NewRequest("POST", targetUrl, reader)
+	if err != nil {
+
+		fmt.Println("GetHttpSkip Request Error:", err)
+	}
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Connection", "close")
+	//启用cookie
+	client.Jar, _ = cookiejar.New(nil)
+	resp, err = client.Do(request)
+	check(err)
+	if data, err = ioutil.ReadAll(resp.Body); err == nil {
+		fmt.Printf("%s\n", data)
+	}
+	err = resp.Body.Close()
+	if err != nil {
+		logrus.Errorln(err)
+	}
+	// 解析返回的JSON数据
+	var message SucessCode
+	err = json.Unmarshal(data, &message)
+
+	check(err)
+	return message
+}
+
 func (front *FrontEnd) Relay(w http.ResponseWriter, r *http.Request) {
 
 	r.ParseForm()
-	relaybody, err := ioutil.ReadAll(r.Body)
+	relaybody, _ := ioutil.ReadAll(r.Body)
 
 	var jsonSring string //存储获取的jsonrpc命令字符串
 	for k, _ := range r.Form {
