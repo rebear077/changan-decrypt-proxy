@@ -98,6 +98,7 @@ type InvoiceInformation struct {
 	Invoicenum      string `json:"InvoiceNum"`
 	Checkcode       string `json:"CheckCode"`
 	Invoiceamt      string `json:"InvoiceAmt"`
+	Owner           string `json:"Owner"`
 }
 
 type InvoiceInformationReturn struct {

@@ -246,6 +246,35 @@ func (s *SqlCtr) AccountinfoToMap(ret []string) []*types.CollectionAccount {
 	return handleCollectionAccount(ret)
 }
 
+// /////////////////////////////////////////////////////////////////////////////
+func (s *SqlCtr) FinancingContractIndex(request *http.Request) *types.FinancingContractSearch {
+	query := request.URL.Query()
+	id := ""
+	pageid := "1"
+	searchType := "increase"
+	if len(query["id"]) > 0 {
+		id = query["id"][0]
+	}
+	if len(query["pageid"]) > 0 {
+		pageid = query["pageid"][0]
+	}
+	if len(query["searchType"]) > 0 {
+		searchType = query["searchType"][0]
+	}
+	index := types.FinancingContractSearch{
+		Id:         id,
+		PageId:     pageid,
+		SearchType: searchType,
+	}
+	return &index
+}
+
+// func (s *SqlCtr) FinancingContractToMap(ret []string) []*types.CollectionAccount {
+
+// 	return handleCollectionAccount(ret)
+// }
+
+// ////////////////////////////////////////////////////////////////////////////////////////
 // 查询mysql数据库中加密后的发票信息，如果id为空，则查找全部的信息
 func (s *SqlCtr) QueryInvoiceInformation(id string) []string {
 	var ret []string
@@ -440,7 +469,9 @@ func (s *SqlCtr) QueryInvoiceByOrder(order string) ([]string, error) {
 			logrus.Errorln("利用对称密钥解密数据失败")
 		}
 		if s.Decrypter.ValidateHash([]byte(record.Hash), data) {
-			ret = append(ret, string(data))
+
+			StrData := string(data) + "," + record.Owner
+			ret = append(ret, StrData)
 		} else {
 			logrus.Errorln("哈希值与数据对应错误")
 		}

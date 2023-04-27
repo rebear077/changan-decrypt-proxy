@@ -12,7 +12,6 @@ func handleInvoiceInfo(data []string) []*types.InvoiceInformation {
 	var INV []*types.InvoiceInformation
 	for i := 0; i < len(data); i++ {
 		str := data[i]
-		//fmt.Println(str)
 		str_split := strings.Split(str, ",")
 
 		ICfo := types.InvoiceInformation{
@@ -33,10 +32,10 @@ func handleInvoiceInfo(data []string) []*types.InvoiceInformation {
 			Invoicenum:      str_split[14],
 			Checkcode:       str_split[15],
 			Invoiceamt:      str_split[16],
+			Owner:           str_split[17],
 		}
 		INV = append(INV, &ICfo)
 	}
-	// fmt.Println(INV)
 	return INV
 }
 
@@ -70,10 +69,8 @@ func HandleHistoricaltransactionUsedinfos(data []string) []*types.TransactionHis
 			Customerid:      header_split[6],
 			Usedinfos:       UsedInfos,
 		}
-		// fmt.Println(trsh)
 		HUI = append(HUI, &trui)
 	}
-	// fmt.Println(HUI)
 	return HUI
 }
 
@@ -108,7 +105,6 @@ func HandleHistoricaltransactionSettleinfos(data []string) []*types.TransactionH
 		}
 		HSI = append(HSI, &trsi)
 	}
-	// fmt.Println(HSI)
 	return HSI
 }
 
@@ -143,7 +139,6 @@ func HandleHistoricaltransactionOrderinfos(data []string) []*types.TransactionHi
 		}
 		HOI = append(HOI, &troi)
 	}
-	// fmt.Println(HOI)
 	return HOI
 }
 
@@ -178,7 +173,6 @@ func HandleHistoricaltransactionReceivableinfos(data []string) []*types.Transact
 		}
 		HRI = append(HRI, &trri)
 	}
-	// fmt.Println(HRI)
 	return HRI
 }
 
@@ -216,7 +210,6 @@ func HandleEnterpoolDataPlaninfos(data []string) []*types.EnterpoolDataPlaninfos
 		}
 		EPD = append(EPD, &epdt)
 	}
-	// fmt.Println(EPD)
 	return EPD
 }
 
@@ -250,6 +243,5 @@ func HandleEnterpoolDataProviderusedinfos(data []string) []*types.EnterpoolDataP
 		}
 		EPD = append(EPD, &epdt)
 	}
-	// fmt.Println(EPD)
 	return EPD
 }
