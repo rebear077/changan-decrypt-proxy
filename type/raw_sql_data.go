@@ -1,15 +1,5 @@
 package types
 
-type RawSQLData struct {
-	SQLId  string
-	Num    string
-	Status string
-	ID     string
-	Data   string
-	Key    string
-	Hash   string
-}
-
 type RawCanalData struct {
 	SQLId []byte
 }
@@ -18,12 +8,14 @@ type RawInvoiceData struct {
 	Num        string
 	Status     string
 	ID         string
+	CustomerID string
 	Time       string
 	Type       string
 	InvoiceNum string
 	Data       string
 	Key        string
 	Hash       string
+	Owner      string
 }
 
 type RawHistoryTransData struct {
@@ -31,11 +23,13 @@ type RawHistoryTransData struct {
 	Num            string
 	Status         string
 	Id             string
+	CustomerID     string
 	TradeYearMonth string
 	FinanceId      string
 	Data           string
 	Key            string
 	Hash           string
+	Owner          string
 }
 
 type RawEnterPoolData struct {
@@ -43,10 +37,12 @@ type RawEnterPoolData struct {
 	Num            string
 	Status         string
 	Id             string
+	CustomerID     string
 	TradeYearMonth string
 	Data           string
 	Key            string
 	Hash           string
+	Owner          string
 }
 type RawFinancingData struct {
 	SQLId     string
@@ -57,6 +53,30 @@ type RawFinancingData struct {
 	Data      string
 	Key       string
 	Hash      string
+}
+
+// 服务于回款账户
+type RawAccountsData struct {
+	SQLId  string
+	Num    string
+	Status string
+	ID     string
+	Data   string
+	Key    string
+	Hash   string
+}
+type RawFinancingContractData struct {
+	SQLId       string
+	Num         string
+	Status      string
+	ID          string
+	FinancingID string
+	CustomerID  string
+	CorpName    string
+	DebtMoney   string
+	SupplyDate  string
+	ExpireDate  string
+	Balance     string
 }
 
 // 发票信息推送接口
