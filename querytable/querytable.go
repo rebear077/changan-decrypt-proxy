@@ -145,6 +145,20 @@ func (front *FrontEnd) DecryptAccountInformation(writer http.ResponseWriter, req
 	jsonData := front.Server.PackToAccountJson(accounts, totalcount, currentPage)
 	fmt.Fprint(writer, jsonData)
 }
+func (front *FrontEnd) DecryptFinancingContractInformation(writer http.ResponseWriter, request *http.Request) {
+	order := make(map[string]string)
+	Sql := sql.NewSqlCtr()
+	slice := Sql.FinancingContractIndex(request)
+	fmt.Println(slice)
+	order["id"] = slice.Id
+	order["pageid"] = slice.PageId
+	currentPage, _ := strconv.Atoi(order["pageid"])
+	order["searchType"] = slice.SearchType
+	fmt.Println(order)
+	contracts, totalcount := front.Server.SearchFinancingContractFromRedis(order)
+	jsonData := front.Server.PackToFinancingContractJson(contracts, totalcount, currentPage)
+	fmt.Fprint(writer, jsonData)
+}
 
 // 接口，负责发送勾选数据至其他服务端
 func handle(targetUrl string, targetJson string) SucessCode {
@@ -190,7 +204,7 @@ func (front *FrontEnd) Relay(w http.ResponseWriter, r *http.Request) {
 	relaybody, _ := ioutil.ReadAll(r.Body)
 
 	var jsonSring string //存储获取的jsonrpc命令字符串
-	for k, _ := range r.Form {
+	for k := range r.Form {
 		fmt.Printf("接收到的消息:%v\n", k)
 		jsonSring = k
 	}
@@ -203,7 +217,7 @@ func (front *FrontEnd) Relay(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("err:", err)
 	}
-	b, err := ioutil.ReadAll(response.Body) //等待fisco jsonrpc端口的回复
+	b, _ := ioutil.ReadAll(response.Body) //等待fisco jsonrpc端口的回复
 
 	w.Write(b) //将获取的回复回复给当前的http客户端
 
@@ -214,7 +228,7 @@ func (front *FrontEnd) ParesTXInfo(w http.ResponseWriter, r *http.Request) {
 	relaybody, _ := ioutil.ReadAll(r.Body)
 
 	var jsonSring string //存储获取的jsonrpc命令字符串
-	for k, _ := range r.Form {
+	for k := range r.Form {
 		jsonSring = k
 	}
 	if jsonSring != "" {
@@ -251,7 +265,7 @@ func (front *FrontEnd) ParesTXInfo(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Println()
 		}
-		b, err := ioutil.ReadAll(response.Body) //等待fisco jsonrpc端口的回复
+		b, _ := ioutil.ReadAll(response.Body) //等待fisco jsonrpc端口的回复
 
 		w.Header().Set("Access-Control-Allow-Origin", "*") //允许访问所有域
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, UPDATE")
@@ -303,7 +317,7 @@ func (front *FrontEnd) ParesTXInfo(w http.ResponseWriter, r *http.Request) {
 			fmt.Println()
 		}
 
-		b, err := ioutil.ReadAll(response.Body) //等待fisco jsonrpc端口的回复
+		b, _ := ioutil.ReadAll(response.Body) //等待fisco jsonrpc端口的回复
 		blockCount := new(proxy.JsonBlockNumber)
 		json.Unmarshal(b, blockCount)
 		// fmt.Println("request header: ", request.Header)
@@ -355,7 +369,7 @@ func (front *FrontEnd) ParesTXInfo(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				fmt.Println()
 			}
-			b, err := ioutil.ReadAll(response.Body) //等待fisco jsonrpc端口的回复
+			b, _ := ioutil.ReadAll(response.Body) //等待fisco jsonrpc端口的回复
 			// fmt.Println("request header: ", request.Header)
 			// fmt.Println("request: ", request)
 			// fmt.Println("response: ", response)
@@ -410,7 +424,7 @@ func (front *FrontEnd) ParesTXInfo(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Println()
 		}
-		b, err := ioutil.ReadAll(response.Body) //等待fisco jsonrpc端口的回复
+		b, _ := ioutil.ReadAll(response.Body) //等待fisco jsonrpc端口的回复
 		// fmt.Println("request header: ", request.Header)
 		// fmt.Println("request: ", request)
 		// fmt.Println("response: ", response)

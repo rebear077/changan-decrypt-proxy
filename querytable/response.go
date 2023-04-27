@@ -14,14 +14,15 @@ func wrongJsonType() string {
 	}`)
 	return string(jsonData)
 }
-func sucessCode() string {
-	jsonData := []byte(`{
-		"msg":"",
-		"result": "{}",
-		"code":"SUC000000"
-	}`)
-	return string(jsonData)
-}
+
+//	func sucessCode() string {
+//		jsonData := []byte(`{
+//			"msg":"",
+//			"result": "{}",
+//			"code":"SUC000000"
+//		}`)
+//		return string(jsonData)
+//	}
 func failedCode() string {
 	jsonData := []byte(`{
 		"msg":"",

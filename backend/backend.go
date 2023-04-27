@@ -20,6 +20,7 @@ type Server struct {
 	redisEnterPool          *redis.RedisOperator
 	redisFinancingIntention *redis.RedisOperator
 	redisCollectionAccount  *redis.RedisOperator
+	redisFinancingContract  *redis.RedisOperator
 	canal                   *canal.Connector
 }
 
@@ -36,6 +37,7 @@ func NewServer() *Server {
 	enterpool := redis.NewRedisOperator(2)
 	financingIntention := redis.NewRedisOperator(3)
 	collectAccount := redis.NewRedisOperator(4)
+	finangcingContract := redis.NewRedisOperator(5)
 	// canal := canal.NewConnector("db0\\.u_t.*")
 	canal := canal.NewConnector(config.CanalConnectedDB + "\\.u_t.*")
 	return &Server{
@@ -45,6 +47,7 @@ func NewServer() *Server {
 		redisEnterPool:          enterpool,
 		redisFinancingIntention: financingIntention,
 		redisCollectionAccount:  collectAccount,
+		redisFinancingContract:  finangcingContract,
 		canal:                   canal,
 	}
 }

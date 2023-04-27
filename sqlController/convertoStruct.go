@@ -370,6 +370,24 @@ func handleCollectionAccount(data []string) []*types.CollectionAccount {
 	// fmt.Println(COLA)
 	return COLA
 }
+func handleFinancingContract(data []types.RawFinancingContractData) []*types.FinancingContract {
+	var FC []*types.FinancingContract
+	for _, v := range data {
+		fc := types.FinancingContract{
+			FinancingID: v.FinancingID,
+			CustomerID:  v.CustomerID,
+			CorpName:    v.CorpName,
+			DebtMoney:   v.DebtMoney,
+			SupplyDate:  v.SupplyDate,
+			ExpireDate:  v.ExpireDate,
+			Balance:     v.Balance,
+		}
+		FC = append(FC, &fc)
+
+	}
+
+	return FC
+}
 
 // 将从数据库解密出来的数据从[]string先转换成结构体数组，然后转换成json
 func (s *SqlCtr) ConvertoStruct(method string, data []string) string {

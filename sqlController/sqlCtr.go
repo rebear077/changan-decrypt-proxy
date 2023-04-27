@@ -269,10 +269,10 @@ func (s *SqlCtr) FinancingContractIndex(request *http.Request) *types.FinancingC
 	return &index
 }
 
-// func (s *SqlCtr) FinancingContractToMap(ret []string) []*types.CollectionAccount {
+func (s *SqlCtr) FinancingContractToMap(ret []types.RawFinancingContractData) []*types.FinancingContract {
 
-// 	return handleCollectionAccount(ret)
-// }
+	return handleFinancingContract(ret)
+}
 
 // ////////////////////////////////////////////////////////////////////////////////////////
 // 查询mysql数据库中加密后的发票信息，如果id为空，则查找全部的信息

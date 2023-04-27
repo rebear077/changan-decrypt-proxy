@@ -318,3 +318,18 @@ type Invoiceinfos struct {
 	Checkcode       string `json:"CheckCode"`
 	Invoiceamt      string `json:"InvoiceAmt"`
 }
+
+type FinancingContract struct {
+	FinancingID string `json:"FinancingID"`
+	CustomerID  string `json:"CustomerID"`
+	CorpName    string `json:"CorpName"`
+	DebtMoney   string `json:"DebtMoney"`
+	SupplyDate  string `json:"SupplyDate"`
+	ExpireDate  string `json:"ExpireDate"`
+	Balance     string `json:"Balance"`
+}
+type FinancingContractReturn struct {
+	FinancingContractList []*FinancingContract `json:"financingContractInformationList"`
+	TotalCount            int                  `json:"totalcount"`
+	CurrentPage           int                  `json:"currentPage"`
+}

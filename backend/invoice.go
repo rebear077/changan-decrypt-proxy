@@ -37,6 +37,7 @@ func (s *Server) StoreInvoicesToRedis(data []*types.InvoiceInformation) {
 		values["Invoicenum"] = invoice.Invoicenum
 		values["Checkcode"] = invoice.Checkcode
 		values["Invoiceamt"] = invoice.Invoiceamt
+		values["Owner"] = invoice.Owner
 		err := s.redisInvoice.MultipleSet(ctx, key, values)
 		if err != nil {
 			logrus.Errorln(err)
@@ -95,20 +96,6 @@ func (s *Server) searchInvoiceByIDFromRedis(id string, order string) []*types.In
 		invoices = append(invoices, invoice)
 	}
 	return invoices
-	// } else {
-	// 	keys := s.SearchInvoiceKeysFromZset(ctx, start, end, order)
-	// 	for _, key := range keys {
-	// 		resmap, err := s.redisInvoice.GetAll(ctx, key)
-	// 		if err != nil {
-	// 			logrus.Errorln(err)
-	// 			continue
-	// 		}
-	// 		invoice := packToInvoiceStruct(resmap)
-	// 		invoices = append(invoices, invoice)
-	// 	}
-	// 	return invoices
-	// }
-
 }
 
 // 根据发票的时间戳进行过滤，调用此函数前，需要先通过id进行第一次检索
@@ -206,6 +193,7 @@ func packToInvoiceStruct(message map[string]string) *types.InvoiceInformation {
 	invoice.Invoicenum = message["Invoicenum"]
 	invoice.Checkcode = message["Checkcode"]
 	invoice.Invoiceamt = message["Invoiceamt"]
+	invoice.Owner = message["Owner"]
 	return invoice
 
 }
