@@ -61,9 +61,6 @@ func (s *Server) ForceSynchronous() {
 	//同步发票信息
 	plaintext := s.sql.QueryInvoiceInformation("")
 	invoices := s.sql.InvoiceinfoToMap(plaintext)
-	// for _, invoice := range invoices {
-	// 	fmt.Println(invoice)
-	// }
 	s.StoreInvoicesToRedis(invoices)
 	//同步历史交易信息
 	txs := s.SearchHistoryTXByID("")
@@ -79,6 +76,10 @@ func (s *Server) ForceSynchronous() {
 	plaintextAccounts := s.sql.QueryCollectionAccount("")
 	accounts := s.sql.AccountinfoToMap(plaintextAccounts)
 	s.StoreAccountToRedis(accounts)
+	//同步借贷合同信息
+	plainContracts := s.sql.QueryFinancingContract("")
+	contracts := s.sql.FinancingContractToMap(plainContracts)
+	s.StoreFinancingContractToRedis(contracts)
 
 }
 
@@ -143,6 +144,12 @@ func (s *Server) DumpFromCanal() {
 			messages := make([]*types.RawCanalData, 0)
 			messages = append(messages, s.canal.RawData[canal.PoolUsed]...)
 			delete(s.canal.RawData, canal.PoolUsed)
+			s.CannalStoreEnterPoolUsedToredis(messages)
+		}
+		if len(s.canal.RawData[canal.FinancingContract]) != 0 {
+			messages := make([]*types.RawCanalData, 0)
+			messages = append(messages, s.canal.RawData[canal.FinancingContract]...)
+			delete(s.canal.RawData, canal.FinancingContract)
 			s.CannalStoreEnterPoolUsedToredis(messages)
 		}
 		s.canal.Lock.Unlock()
@@ -297,7 +304,7 @@ func (s *Server) CannalStoreEnterPoolPlanToredis(datas []*types.RawCanalData) {
 			values["PlaninfosTradeyearmonth"] = pland.Planinfos[0].Tradeyearmonth
 			values["PlaninfosPlanamount"] = pland.Planinfos[0].Planamount
 			values["PlaninfosCurrency"] = pland.Planinfos[0].Currency
-			fmt.Println(values)
+			fmt.Println(values, "......")
 			s.redisEnterPool.MultipleSet(ctx, key, values)
 		}
 
@@ -321,12 +328,20 @@ func (s *Server) CannalStoreEnterPoolUsedToredis(datas []*types.RawCanalData) {
 			values["ProviderusedinfosTradeyearmonth"] = used.Providerusedinfos[0].Tradeyearmonth
 			values["ProviderusedinfosUsedamount"] = used.Providerusedinfos[0].Usedamount
 			values["ProviderusedinfosCurrency"] = used.Providerusedinfos[0].Currency
-			fmt.Println(values)
+			fmt.Println(values, "/////")
 			err := s.redisEnterPool.MultipleSet(ctx, key, values)
 			if err != nil {
 				logrus.Errorln(err)
 			}
 		}
 
+	}
+}
+
+func (s *Server) CannalStoreFinancingContractToredis(datas []*types.RawCanalData) {
+	for _, data := range datas {
+		rawContracts := s.sql.QueryFinancingContractBySQLID(string(data.SQLId))
+		contracts := s.sql.FinancingContractToMap(rawContracts)
+		s.StoreFinancingContractToRedis(contracts)
 	}
 }

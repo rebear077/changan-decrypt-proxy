@@ -2,7 +2,7 @@
 MslUrl="127.0.0.1:3306"
 MslUsername="root"
 MslPasswd="123456"
-MslName="db0"
+MslName="db_node0"
 MslProtocol="tcp"
 
 [LogDB]
@@ -18,7 +18,7 @@ CanalPort=11111
 CanalUsername="canal"
 CanalPassword="canal"
 CanalDestination="example"
-CanalConnectedDB="db0"
+CanalConnectedDB="db_node1"
 
 
 [log]

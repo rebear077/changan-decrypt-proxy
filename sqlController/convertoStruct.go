@@ -370,7 +370,7 @@ func handleCollectionAccount(data []string) []*types.CollectionAccount {
 	// fmt.Println(COLA)
 	return COLA
 }
-func handleFinancingContract(data []types.RawFinancingContractData) []*types.FinancingContract {
+func handleFinancingContract(data []*types.RawFinancingContractData) []*types.FinancingContract {
 	var FC []*types.FinancingContract
 	for _, v := range data {
 		fc := types.FinancingContract{

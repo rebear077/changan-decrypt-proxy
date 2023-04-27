@@ -17,15 +17,16 @@ import (
 )
 
 const (
-	Invoice       = "u_t_invoice_information1"
-	Accounts      = "u_t_push_payment_accounts1"
-	Intension     = "u_t_supplier_financing_application1"
-	HisOrder      = "u_t_history_order_information2"
-	HisUsed       = "u_t_history_used_information2"
-	HisSettle     = "u_t_history_settle_information2"
-	HisReceivable = "u_t_history_receivable_information2"
-	PoolPlan      = "u_t_pool_plan_information1"
-	PoolUsed      = "u_t_pool_used_information1"
+	Invoice           = "u_t_invoice_information3"
+	Accounts          = "u_t_push_payment_accounts"
+	Intension         = "u_t_supplier_financing_application1"
+	HisOrder          = "u_t_history_order_information3"
+	HisUsed           = "u_t_history_used_information3"
+	HisSettle         = "u_t_history_settle_information4"
+	HisReceivable     = "u_t_history_receivable_information3"
+	PoolPlan          = "u_t_pool_plan_information2"
+	PoolUsed          = "u_t_pool_used_information2"
+	FinancingContract = "u_t_finance_contract1"
 )
 
 type Connector struct {
@@ -61,6 +62,7 @@ func NewConnector(table string) *Connector {
 	//  5.  多个规则组合使用：canal\\..*,mysql.test1,mysql.test2 (逗号分隔)
 
 	// err = connector.Subscribe("db_node1\\.u_t_history_settle_information")
+	logrus.Infoln(table)
 	err = connector.Subscribe(table)
 	if err != nil {
 		logrus.Errorln(err)
@@ -93,6 +95,7 @@ func (c *Connector) Start() {
 	}
 }
 func (c *Connector) dealMessage(entrys []pbe.Entry) {
+	fmt.Println("1223456334")
 	for _, entry := range entrys {
 		fmt.Println(entry.GetEntryType())
 		if entry.GetEntryType() == pbe.EntryType_TRANSACTIONBEGIN || entry.GetEntryType() == pbe.EntryType_TRANSACTIONEND {
@@ -104,7 +107,7 @@ func (c *Connector) dealMessage(entrys []pbe.Entry) {
 		if rowChange != nil {
 			eventType := rowChange.GetEventType()
 			header := entry.GetHeader()
-			// fmt.Println(fmt.Sprintf("================> binlog[%s : %d],name[%s,%s], eventType: %s", header.GetLogfileName(), header.GetLogfileOffset(), header.GetSchemaName(), header.GetTableName(), header.GetEventType()))
+			fmt.Println(fmt.Sprintf("================> binlog[%s : %d],name[%s,%s], eventType: %s", header.GetLogfileName(), header.GetLogfileOffset(), header.GetSchemaName(), header.GetTableName(), header.GetEventType()))
 			switch header.GetTableName() {
 			case Invoice:
 				for _, rowData := range rowChange.GetRowDatas() {
@@ -159,6 +162,12 @@ func (c *Connector) dealMessage(entrys []pbe.Entry) {
 				for _, rowData := range rowChange.GetRowDatas() {
 					if eventType == pbe.EventType_INSERT {
 						c.dealInsertPoolUsedMessage(rowData.GetAfterColumns())
+					}
+				}
+			case FinancingContract:
+				for _, rowData := range rowChange.GetRowDatas() {
+					if eventType == pbe.EventType_INSERT {
+						c.dealInsertFinancingContractMessage(rowData.GetAfterColumns())
 					}
 				}
 			default:
@@ -244,6 +253,15 @@ func (c *Connector) dealInsertPoolUsedMessage(columns []*pbe.Column) {
 	fmt.Println(rawdata)
 	c.Lock.Lock()
 	c.RawData[PoolUsed] = append(c.RawData[PoolUsed], rawdata)
+	c.Lock.Unlock()
+
+}
+func (c *Connector) dealInsertFinancingContractMessage(columns []*pbe.Column) {
+	rawdata := new(types.RawCanalData)
+	rawdata.SQLId = []byte(columns[0].GetValue())
+	fmt.Println(rawdata)
+	c.Lock.Lock()
+	c.RawData[FinancingContract] = append(c.RawData[FinancingContract], rawdata)
 	c.Lock.Unlock()
 
 }

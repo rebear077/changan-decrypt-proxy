@@ -12,7 +12,7 @@ func main() {
 	front := querytable.NewFrontEnd()
 	front.Server.ForceSynchronous()
 	time.Sleep(1 * time.Second)
-	// go front.Server.DumpFromCanal()
+	go front.Server.DumpFromCanal()
 
 	http.HandleFunc("/asl/universal/decryptInvoiceInformation", front.DecryptInvoiceInformation)
 	http.HandleFunc("/asl/universal/decryptHistoricaltransaction", front.DecryptHistoricaltransaction)
@@ -20,6 +20,7 @@ func main() {
 	http.HandleFunc("/asl/universal/decryptFinancingIntention", front.DecryptIntensionInformation)
 	http.HandleFunc("/asl/universal/decryptCollectionAccount", front.DecryptAccountInformation)
 	http.HandleFunc("/asl/universal/selectedToApplication", front.DecryptSelectToApplicationInformation)
+	http.HandleFunc("/asl/universal/decrypteFinancingContract", front.DecryptFinancingContractInformation)
 	http.HandleFunc("/asl/universal/handle/", front.ParesTXInfo)
 
 	// err := http.ListenAndServeTLS(":8440", "connApi/confs/server.pem", "connApi/confs/server.key", nil)

@@ -18,42 +18,42 @@ type SqlCtr struct {
 
 const (
 	//发票查询指令
-	InvoiceSQLQueryAll    = "select * from u_t_invoice_information1"
-	InvoiceSQLQueryByID   = "select * from u_t_invoice_information1 where id ="
-	InvoiceSQLQueryBy_ID  = "select * from u_t_invoice_information1 where _id_= "
-	InvoiceSQLQueryLength = "select count(*) from u_t_invoice_information1"
+	InvoiceSQLQueryAll    = "select * from u_t_invoice_information3"
+	InvoiceSQLQueryByID   = "select * from u_t_invoice_information3 where id ="
+	InvoiceSQLQueryBy_ID  = "select * from u_t_invoice_information3 where _id_= "
+	InvoiceSQLQueryLength = "select count(*) from u_t_invoice_information3"
 	// 历史交易信息-used信息
-	HistoricalUsedSQLQueryAll   = "select * from u_t_history_used_information2"
-	HistoricalUsedSQLQueryByID  = "select * from u_t_history_used_information2 where id = "
-	HistoricalUsedSQLQueryBy_ID = "select * from u_t_history_used_information2 where _id_= "
+	HistoricalUsedSQLQueryAll   = "select * from u_t_history_used_information3"
+	HistoricalUsedSQLQueryByID  = "select * from u_t_history_used_information3 where id = "
+	HistoricalUsedSQLQueryBy_ID = "select * from u_t_history_used_information3 where _id_= "
 	// 历史交易信息-settle信息
-	HistoricalSettleSQLQueryAll   = "select * from u_t_history_settle_information2"
-	HistoricalSettleSQLQueryByID  = "select * from u_t_history_settle_information2 where id = "
-	HistoricalSettleSQLQueryBy_ID = "select * from u_t_history_settle_information2 where _id_= "
+	HistoricalSettleSQLQueryAll   = "select * from u_t_history_settle_information4"
+	HistoricalSettleSQLQueryByID  = "select * from u_t_history_settle_information4 where id = "
+	HistoricalSettleSQLQueryBy_ID = "select * from u_t_history_settle_information4 where _id_= "
 	//历史交易信息-order信息
-	HistoricalOrderSQLQueryAll   = "select * from u_t_history_order_information2"
-	HistoricalOrderSQLQueryByID  = "select * from u_t_history_order_information2 where id = "
-	HistoricalOrderSQLQueryBy_ID = "select * from u_t_history_order_information2 where _id_= "
+	HistoricalOrderSQLQueryAll   = "select * from u_t_history_order_information3"
+	HistoricalOrderSQLQueryByID  = "select * from u_t_history_order_information3 where id = "
+	HistoricalOrderSQLQueryBy_ID = "select * from u_t_history_order_information3 where _id_= "
 	//历史交易信息-receivalble信息
-	HistoricalReceivableSQLQueryAll   = "select * from u_t_history_receivable_information2"
-	HistoricalReceivableSQLQueryByID  = "select * from u_t_history_receivable_information2 where id = "
-	HistoricalReceivableSQLQueryBy_ID = "select * from u_t_history_receivable_information2 where _id_= "
+	HistoricalReceivableSQLQueryAll   = "select * from u_t_history_receivable_information3"
+	HistoricalReceivableSQLQueryByID  = "select * from u_t_history_receivable_information3 where id = "
+	HistoricalReceivableSQLQueryBy_ID = "select * from u_t_history_receivable_information3 where _id_= "
 	// 入池数据-plan信息
-	EnterPoolPlanSQLQueryAll   = "select * from u_t_pool_plan_information1"
-	EnterPoolPlanSQLQueryByID  = "select * from u_t_pool_plan_information1 where id = "
-	EnterPoolPlanSQLQueryBy_ID = "select * from u_t_pool_plan_information1 where _id_= "
+	EnterPoolPlanSQLQueryAll   = "select * from u_t_pool_plan_information2"
+	EnterPoolPlanSQLQueryByID  = "select * from u_t_pool_plan_information2 where id = "
+	EnterPoolPlanSQLQueryBy_ID = "select * from u_t_pool_plan_information2 where _id_= "
 	//入池数据-used信息
-	EnterPoolUsedSQLQueryAll   = "select * from u_t_pool_used_information1"
-	EnterPoolUsedSQLQueryByID  = "select * from u_t_pool_used_information1 where id = "
-	EnterPoolUsedSQLQueryBy_ID = "select * from u_t_pool_used_information1 where _id_= "
+	EnterPoolUsedSQLQueryAll   = "select * from u_t_pool_used_information2"
+	EnterPoolUsedSQLQueryByID  = "select * from u_t_pool_used_information2 where id = "
+	EnterPoolUsedSQLQueryBy_ID = "select * from u_t_pool_used_information2 where _id_= "
 	//融资意向信息
 	FinancingSQLQueryAll   = "select * from u_t_supplier_financing_application1"
 	FinancingSQLQueryByID  = "select * from u_t_supplier_financing_application1 where id = "
 	FinancingSQLQueryBy_ID = "select * from u_t_supplier_financing_application1 where _id_= "
 	//回款账户信息
-	AccountsSQLQueryAll   = "select * from u_t_push_payment_accounts1"
-	AccountsSQLQueryByID  = "select * from u_t_push_payment_accounts1 where id = "
-	AccountsSQLQueryBy_ID = "select * from u_t_push_payment_accounts1 where _id_= "
+	AccountsSQLQueryAll   = "select * from u_t_push_payment_accounts"
+	AccountsSQLQueryByID  = "select * from u_t_push_payment_accounts where id = "
+	AccountsSQLQueryBy_ID = "select * from u_t_push_payment_accounts where _id_= "
 	// 借贷合同信息
 	FinancingContractSQLAll   = "select * from u_t_finance_contract1"
 	FinancingContractSQLByID  = "select * from u_t_finance_contract1 where id="
@@ -269,7 +269,7 @@ func (s *SqlCtr) FinancingContractIndex(request *http.Request) *types.FinancingC
 	return &index
 }
 
-func (s *SqlCtr) FinancingContractToMap(ret []types.RawFinancingContractData) []*types.FinancingContract {
+func (s *SqlCtr) FinancingContractToMap(ret []*types.RawFinancingContractData) []*types.FinancingContract {
 
 	return handleFinancingContract(ret)
 }
@@ -424,8 +424,8 @@ func (s *SqlCtr) QueryCollectionAccountBySQLID(_id_ string) []string {
 }
 
 // //////////////////////////////////////////////////////////////////////////////////
-func (s *SqlCtr) QueryFinancingContract(id string) []types.RawFinancingContractData {
-	var ret []types.RawFinancingContractData
+func (s *SqlCtr) QueryFinancingContract(id string) []*types.RawFinancingContractData {
+	var ret []*types.RawFinancingContractData
 	if id == "" {
 		ret, _ = s.QueryFinancingContractByOrder(FinancingContractSQLAll)
 	} else {
@@ -433,8 +433,8 @@ func (s *SqlCtr) QueryFinancingContract(id string) []types.RawFinancingContractD
 	}
 	return ret
 }
-func (s *SqlCtr) QueryFinancingContractBySQLID(_id_ string) []types.RawFinancingContractData {
-	var ret []types.RawFinancingContractData
+func (s *SqlCtr) QueryFinancingContractBySQLID(_id_ string) []*types.RawFinancingContractData {
+	var ret []*types.RawFinancingContractData
 	ret, _ = s.QueryFinancingContractByOrder(AccountsSQLQueryBy_ID + _id_)
 	return ret
 }
@@ -633,7 +633,7 @@ func (s *SqlCtr) QueryAccountsByOrder(order string) ([]string, error) {
 }
 
 // 输入命令，比如“select * from u_t_push_payment_accounts”,
-func (s *SqlCtr) QueryFinancingContractByOrder(order string) ([]types.RawFinancingContractData, error) {
+func (s *SqlCtr) QueryFinancingContractByOrder(order string) ([]*types.RawFinancingContractData, error) {
 	in_stmt, err := s.db.Prepare(order)
 	if err != nil {
 		return nil, err
@@ -642,7 +642,7 @@ func (s *SqlCtr) QueryFinancingContractByOrder(order string) ([]types.RawFinanci
 	if err != nil {
 		return nil, err
 	}
-	ret := make([]types.RawFinancingContractData, 0)
+	ret := make([]*types.RawFinancingContractData, 0)
 	count := 0
 	for rows.Next() {
 		record := &types.RawFinancingContractData{}
@@ -652,7 +652,7 @@ func (s *SqlCtr) QueryFinancingContractByOrder(order string) ([]types.RawFinanci
 			count++
 			continue
 		}
-		ret = append(ret, *record)
+		ret = append(ret, record)
 	}
 	return ret, nil
 }
