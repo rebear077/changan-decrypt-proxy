@@ -42,6 +42,7 @@ func NewConnector(table string) *Connector {
 		logrus.Fatalln(err)
 	}
 	config := &configs[0]
+	fmt.Println(config.CanalIP, config.CanalPort, config.CanalUsername, config.CanalPassword, config.CanalDestination)
 	connector := client.NewSimpleCanalConnector(config.CanalIP, config.CanalPort, config.CanalUsername, config.CanalPassword, config.CanalDestination, 60000, 60*60*1000)
 	err = connector.Connect()
 	if err != nil {
@@ -85,6 +86,7 @@ func (c *Connector) Start() {
 			log.Println(err)
 			os.Exit(1)
 		}
+		fmt.Println(message)
 		batchId := message.Id
 		if batchId == -1 || len(message.Entries) <= 0 {
 			time.Sleep(1 * time.Second)

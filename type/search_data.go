@@ -42,7 +42,7 @@ type FinancingContractSearch struct {
 	SearchType string
 }
 type SelectedInfoToApplication struct {
-	Invoice     []InvoiceInformation `json:"invoice"`
-	HistoryInfo []TransactionHistory `json:"historyInfo"`
-	PoolInfo    []EnterpoolData      `json:"poolInfo"`
+	Invoice []InvoiceInformation `json:"invoice"`
+	// HistoryInfo []TransactionHistory `json:"historyInfo"`
+	// PoolInfo    []EnterpoolData      `json:"poolInfo"`
 }

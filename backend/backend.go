@@ -40,6 +40,7 @@ func NewServer() *Server {
 	finangcingContract := redis.NewRedisOperator(5)
 	// canal := canal.NewConnector("db0\\.u_t.*")
 	canal := canal.NewConnector(config.CanalConnectedDB + "\\.u_t.*")
+
 	return &Server{
 		sql:                     sqlCtr,
 		redisInvoice:            invoice,

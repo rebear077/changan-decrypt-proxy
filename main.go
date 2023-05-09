@@ -20,7 +20,7 @@ func main() {
 	http.HandleFunc("/asl/universal/decryptFinancingIntention", front.DecryptIntensionInformation)
 	http.HandleFunc("/asl/universal/decryptCollectionAccount", front.DecryptAccountInformation)
 	http.HandleFunc("/asl/universal/selectedToApplication", front.DecryptSelectToApplicationInformation)
-	http.HandleFunc("/asl/universal/decrypteFinancingContract", front.DecryptFinancingContractInformation)
+	http.HandleFunc("/asl/universal/decryptFinancingContract", front.DecryptFinancingContractInformation)
 	http.HandleFunc("/asl/universal/handle/", front.ParesTXInfo)
 
 	// err := http.ListenAndServeTLS(":8440", "connApi/confs/server.pem", "connApi/confs/server.key", nil)

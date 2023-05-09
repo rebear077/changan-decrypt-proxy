@@ -18,7 +18,7 @@ CanalPort=11111
 CanalUsername="canal"
 CanalPassword="canal"
 CanalDestination="example"
-CanalConnectedDB="db_node1"
+CanalConnectedDB="db_node0"
 
 
 [log]
