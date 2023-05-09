@@ -16,23 +16,11 @@ import (
 	pbe "github.com/withlin/canal-go/protocol/entry"
 )
 
-const (
-	Invoice           = "u_t_invoice_information3"
-	Accounts          = "u_t_push_payment_accounts"
-	Intension         = "u_t_supplier_financing_application1"
-	HisOrder          = "u_t_history_order_information3"
-	HisUsed           = "u_t_history_used_information3"
-	HisSettle         = "u_t_history_settle_information4"
-	HisReceivable     = "u_t_history_receivable_information3"
-	PoolPlan          = "u_t_pool_plan_information2"
-	PoolUsed          = "u_t_pool_used_information2"
-	FinancingContract = "u_t_finance_contract1"
-)
-
 type Connector struct {
 	conn    *client.SimpleCanalConnector
 	queue   *queue.CircleQueue
 	RawData map[string][]*types.RawCanalData
+	tables  *conf.Config
 	Lock    sync.RWMutex
 }
 
@@ -75,6 +63,7 @@ func NewConnector(table string) *Connector {
 		conn:    connector,
 		queue:   queue,
 		RawData: raw,
+		tables:  config,
 	}
 }
 
@@ -103,73 +92,79 @@ func (c *Connector) dealMessage(entrys []pbe.Entry) {
 		if entry.GetEntryType() == pbe.EntryType_TRANSACTIONBEGIN || entry.GetEntryType() == pbe.EntryType_TRANSACTIONEND {
 			continue
 		}
-		rowChange := new(pbe.RowChange)
-		err := proto.Unmarshal(entry.GetStoreValue(), rowChange)
+		rowChange := pbe.RowChange{}
+		err := proto.Unmarshal(entry.GetStoreValue(), &rowChange)
 		checkError(err)
-		if rowChange != nil {
+		if &rowChange != nil {
 			eventType := rowChange.GetEventType()
 			header := entry.GetHeader()
-			fmt.Println(fmt.Sprintf("================> binlog[%s : %d],name[%s,%s], eventType: %s", header.GetLogfileName(), header.GetLogfileOffset(), header.GetSchemaName(), header.GetTableName(), header.GetEventType()))
+			// fmt.Println(fmt.Sprintf("================> binlog[%s : %d],name[%s,%s], eventType: %s", header.GetLogfileName(), header.GetLogfileOffset(), header.GetSchemaName(), header.GetTableName(), header.GetEventType()))
 			switch header.GetTableName() {
-			case Invoice:
+			case c.tables.InvoiceInfos:
 				for _, rowData := range rowChange.GetRowDatas() {
 					if eventType == pbe.EventType_INSERT {
 						c.dealInsertInvoiceMessage(rowData.GetAfterColumns())
 
 					}
 				}
-			case Intension:
+			case c.tables.FinanceApplication:
 				for _, rowData := range rowChange.GetRowDatas() {
 					if eventType == pbe.EventType_INSERT {
 						c.dealInsertIntensionMessage(rowData.GetAfterColumns())
 					}
 				}
-			case Accounts:
+			case c.tables.Accounts:
 				for _, rowData := range rowChange.GetRowDatas() {
 					if eventType == pbe.EventType_INSERT {
 						c.dealInsertAccountMessage(rowData.GetAfterColumns())
 					}
 				}
-			case HisOrder:
+			case c.tables.HistoricalOrder:
 				for _, rowData := range rowChange.GetRowDatas() {
 					if eventType == pbe.EventType_INSERT {
 						c.dealInsertHistoryOrderMessage(rowData.GetAfterColumns())
 					}
 				}
-			case HisReceivable:
+			case c.tables.HistoricalReceivable:
 				for _, rowData := range rowChange.GetRowDatas() {
 					if eventType == pbe.EventType_INSERT {
 						c.dealInsertHistoryReceivableMessage(rowData.GetAfterColumns())
 					}
 				}
-			case HisSettle:
+			case c.tables.HistoricalSettle:
 				for _, rowData := range rowChange.GetRowDatas() {
 					if eventType == pbe.EventType_INSERT {
 						c.dealInsertHistorySettleMessage(rowData.GetAfterColumns())
 					}
 				}
-			case HisUsed:
+			case c.tables.HistoricalUsed:
 				for _, rowData := range rowChange.GetRowDatas() {
 					if eventType == pbe.EventType_INSERT {
 						c.dealInsertHistoryUsedMessage(rowData.GetAfterColumns())
 					}
 				}
-			case PoolPlan:
+			case c.tables.PoolPlanInfos:
 				for _, rowData := range rowChange.GetRowDatas() {
 					if eventType == pbe.EventType_INSERT {
 						c.dealInsertPoolPlanMessage(rowData.GetAfterColumns())
 					}
 				}
-			case PoolUsed:
+			case c.tables.PoolUsedInfos:
 				for _, rowData := range rowChange.GetRowDatas() {
 					if eventType == pbe.EventType_INSERT {
 						c.dealInsertPoolUsedMessage(rowData.GetAfterColumns())
 					}
 				}
-			case FinancingContract:
+			case c.tables.FinanceContract:
 				for _, rowData := range rowChange.GetRowDatas() {
 					if eventType == pbe.EventType_INSERT {
 						c.dealInsertFinancingContractMessage(rowData.GetAfterColumns())
+					}
+				}
+			case c.tables.RepaymentRecord:
+				for _, rowData := range rowChange.GetRowDatas() {
+					if eventType == pbe.EventType_INSERT {
+						c.dealInsertRepaymentRecordtMessage(rowData.GetAfterColumns())
 					}
 				}
 			default:
@@ -183,7 +178,7 @@ func (c *Connector) dealInsertInvoiceMessage(columns []*pbe.Column) {
 	rawdata.SQLId = []byte(columns[0].GetValue())
 	fmt.Println(rawdata)
 	c.Lock.Lock()
-	c.RawData[Invoice] = append(c.RawData[Invoice], rawdata)
+	c.RawData[c.tables.InvoiceInfos] = append(c.RawData[c.tables.InvoiceInfos], rawdata)
 	c.Lock.Unlock()
 
 }
@@ -192,7 +187,7 @@ func (c *Connector) dealInsertHistoryOrderMessage(columns []*pbe.Column) {
 	rawdata.SQLId = []byte(columns[0].GetValue())
 	fmt.Println(rawdata)
 	c.Lock.Lock()
-	c.RawData[HisOrder] = append(c.RawData[HisOrder], rawdata)
+	c.RawData[c.tables.HistoricalOrder] = append(c.RawData[c.tables.HistoricalOrder], rawdata)
 	c.Lock.Unlock()
 
 }
@@ -201,7 +196,7 @@ func (c *Connector) dealInsertHistoryUsedMessage(columns []*pbe.Column) {
 	rawdata.SQLId = []byte(columns[0].GetValue())
 	fmt.Println(rawdata)
 	c.Lock.Lock()
-	c.RawData[HisUsed] = append(c.RawData[HisUsed], rawdata)
+	c.RawData[c.tables.HistoricalUsed] = append(c.RawData[c.tables.HistoricalUsed], rawdata)
 	c.Lock.Unlock()
 
 }
@@ -210,7 +205,7 @@ func (c *Connector) dealInsertHistorySettleMessage(columns []*pbe.Column) {
 	rawdata.SQLId = []byte(columns[0].GetValue())
 	fmt.Println(rawdata)
 	c.Lock.Lock()
-	c.RawData[HisSettle] = append(c.RawData[HisSettle], rawdata)
+	c.RawData[c.tables.HistoricalSettle] = append(c.RawData[c.tables.HistoricalSettle], rawdata)
 	c.Lock.Unlock()
 
 }
@@ -219,7 +214,7 @@ func (c *Connector) dealInsertHistoryReceivableMessage(columns []*pbe.Column) {
 	rawdata.SQLId = []byte(columns[0].GetValue())
 	fmt.Println(rawdata)
 	c.Lock.Lock()
-	c.RawData[HisReceivable] = append(c.RawData[HisReceivable], rawdata)
+	c.RawData[c.tables.HistoricalReceivable] = append(c.RawData[c.tables.HistoricalReceivable], rawdata)
 	c.Lock.Unlock()
 
 }
@@ -228,7 +223,7 @@ func (c *Connector) dealInsertIntensionMessage(columns []*pbe.Column) {
 	rawdata.SQLId = []byte(columns[0].GetValue())
 	fmt.Println(rawdata)
 	c.Lock.Lock()
-	c.RawData[Intension] = append(c.RawData[Intension], rawdata)
+	c.RawData[c.tables.FinanceApplication] = append(c.RawData[c.tables.FinanceApplication], rawdata)
 	c.Lock.Unlock()
 }
 func (c *Connector) dealInsertAccountMessage(columns []*pbe.Column) {
@@ -236,7 +231,7 @@ func (c *Connector) dealInsertAccountMessage(columns []*pbe.Column) {
 	rawdata.SQLId = []byte(columns[0].GetValue())
 	fmt.Println(rawdata)
 	c.Lock.Lock()
-	c.RawData[Accounts] = append(c.RawData[Accounts], rawdata)
+	c.RawData[c.tables.Accounts] = append(c.RawData[c.tables.Accounts], rawdata)
 	c.Lock.Unlock()
 
 }
@@ -245,7 +240,7 @@ func (c *Connector) dealInsertPoolPlanMessage(columns []*pbe.Column) {
 	rawdata.SQLId = []byte(columns[0].GetValue())
 	fmt.Println(rawdata)
 	c.Lock.Lock()
-	c.RawData[PoolPlan] = append(c.RawData[PoolPlan], rawdata)
+	c.RawData[c.tables.PoolPlanInfos] = append(c.RawData[c.tables.PoolPlanInfos], rawdata)
 	c.Lock.Unlock()
 
 }
@@ -254,7 +249,7 @@ func (c *Connector) dealInsertPoolUsedMessage(columns []*pbe.Column) {
 	rawdata.SQLId = []byte(columns[0].GetValue())
 	fmt.Println(rawdata)
 	c.Lock.Lock()
-	c.RawData[PoolUsed] = append(c.RawData[PoolUsed], rawdata)
+	c.RawData[c.tables.PoolUsedInfos] = append(c.RawData[c.tables.PoolUsedInfos], rawdata)
 	c.Lock.Unlock()
 
 }
@@ -263,7 +258,16 @@ func (c *Connector) dealInsertFinancingContractMessage(columns []*pbe.Column) {
 	rawdata.SQLId = []byte(columns[0].GetValue())
 	fmt.Println(rawdata)
 	c.Lock.Lock()
-	c.RawData[FinancingContract] = append(c.RawData[FinancingContract], rawdata)
+	c.RawData[c.tables.FinanceContract] = append(c.RawData[c.tables.FinanceContract], rawdata)
+	c.Lock.Unlock()
+
+}
+func (c *Connector) dealInsertRepaymentRecordtMessage(columns []*pbe.Column) {
+	rawdata := new(types.RawCanalData)
+	rawdata.SQLId = []byte(columns[0].GetValue())
+	fmt.Println(rawdata)
+	c.Lock.Lock()
+	c.RawData[c.tables.RepaymentRecord] = append(c.RawData[c.tables.RepaymentRecord], rawdata)
 	c.Lock.Unlock()
 
 }

@@ -370,6 +370,8 @@ func handleCollectionAccount(data []string) []*types.CollectionAccount {
 	// fmt.Println(COLA)
 	return COLA
 }
+
+// 处理借贷合同信息，转换成结构体
 func handleFinancingContract(data []*types.RawFinancingContractData) []*types.FinancingContract {
 	var FC []*types.FinancingContract
 	for _, v := range data {
@@ -387,6 +389,21 @@ func handleFinancingContract(data []*types.RawFinancingContractData) []*types.Fi
 	}
 
 	return FC
+}
+
+// 处理还款记录信息，转换成结构体
+func handleRepaymentRecord(data []*types.RawRepaymentRecord) []*types.RepaymentRecord {
+	var records []*types.RepaymentRecord
+	for _, v := range data {
+		rr := types.RepaymentRecord{
+			FinancingID:     v.FinancingID,
+			CustomerID:      v.CustomerID,
+			Time:            v.Time,
+			RepaymentAmount: v.Repay,
+		}
+		records = append(records, &rr)
+	}
+	return records
 }
 
 // 将从数据库解密出来的数据从[]string先转换成结构体数组，然后转换成json

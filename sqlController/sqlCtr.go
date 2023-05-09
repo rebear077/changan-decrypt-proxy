@@ -13,51 +13,13 @@ import (
 
 type SqlCtr struct {
 	db        *sql.DB
+	orders    *conf.Config
 	Decrypter *Decrypter
 }
 
 const (
-	//发票查询指令
-	InvoiceSQLQueryAll    = "select * from u_t_invoice_information3"
-	InvoiceSQLQueryByID   = "select * from u_t_invoice_information3 where id ="
-	InvoiceSQLQueryBy_ID  = "select * from u_t_invoice_information3 where _id_= "
-	InvoiceSQLQueryLength = "select count(*) from u_t_invoice_information3"
-	// 历史交易信息-used信息
-	HistoricalUsedSQLQueryAll   = "select * from u_t_history_used_information3"
-	HistoricalUsedSQLQueryByID  = "select * from u_t_history_used_information3 where id = "
-	HistoricalUsedSQLQueryBy_ID = "select * from u_t_history_used_information3 where _id_= "
-	// 历史交易信息-settle信息
-	HistoricalSettleSQLQueryAll   = "select * from u_t_history_settle_information4"
-	HistoricalSettleSQLQueryByID  = "select * from u_t_history_settle_information4 where id = "
-	HistoricalSettleSQLQueryBy_ID = "select * from u_t_history_settle_information4 where _id_= "
-	//历史交易信息-order信息
-	HistoricalOrderSQLQueryAll   = "select * from u_t_history_order_information3"
-	HistoricalOrderSQLQueryByID  = "select * from u_t_history_order_information3 where id = "
-	HistoricalOrderSQLQueryBy_ID = "select * from u_t_history_order_information3 where _id_= "
-	//历史交易信息-receivalble信息
-	HistoricalReceivableSQLQueryAll   = "select * from u_t_history_receivable_information3"
-	HistoricalReceivableSQLQueryByID  = "select * from u_t_history_receivable_information3 where id = "
-	HistoricalReceivableSQLQueryBy_ID = "select * from u_t_history_receivable_information3 where _id_= "
-	// 入池数据-plan信息
-	EnterPoolPlanSQLQueryAll   = "select * from u_t_pool_plan_information2"
-	EnterPoolPlanSQLQueryByID  = "select * from u_t_pool_plan_information2 where id = "
-	EnterPoolPlanSQLQueryBy_ID = "select * from u_t_pool_plan_information2 where _id_= "
-	//入池数据-used信息
-	EnterPoolUsedSQLQueryAll   = "select * from u_t_pool_used_information2"
-	EnterPoolUsedSQLQueryByID  = "select * from u_t_pool_used_information2 where id = "
-	EnterPoolUsedSQLQueryBy_ID = "select * from u_t_pool_used_information2 where _id_= "
-	//融资意向信息
-	FinancingSQLQueryAll   = "select * from u_t_supplier_financing_application1"
-	FinancingSQLQueryByID  = "select * from u_t_supplier_financing_application1 where id = "
-	FinancingSQLQueryBy_ID = "select * from u_t_supplier_financing_application1 where _id_= "
-	//回款账户信息
-	AccountsSQLQueryAll   = "select * from u_t_push_payment_accounts"
-	AccountsSQLQueryByID  = "select * from u_t_push_payment_accounts where id = "
-	AccountsSQLQueryBy_ID = "select * from u_t_push_payment_accounts where _id_= "
-	// 借贷合同信息
-	FinancingContractSQLAll   = "select * from u_t_finance_contract1"
-	FinancingContractSQLByID  = "select * from u_t_finance_contract1 where id="
-	FinancingContractSQLBy_ID = "select * from u_t_finance_contract1 where _id_="
+//发票查询指令
+
 )
 
 func NewSqlCtr() *SqlCtr {
@@ -76,6 +38,7 @@ func NewSqlCtr() *SqlCtr {
 	return &SqlCtr{
 		db:        db,
 		Decrypter: de,
+		orders:    config,
 	}
 }
 
@@ -274,25 +237,53 @@ func (s *SqlCtr) FinancingContractToMap(ret []*types.RawFinancingContractData) [
 	return handleFinancingContract(ret)
 }
 
+// //////////////////////////////////////////////////////////////////////////////////////////
+func (s *SqlCtr) RepaymentRecordIndex(request *http.Request) *types.RepaymentRecordSearch {
+	query := request.URL.Query()
+	id := ""
+	pageid := "1"
+	searchType := "increase"
+	if len(query["id"]) > 0 {
+		id = query["id"][0]
+	}
+	if len(query["pageid"]) > 0 {
+		pageid = query["pageid"][0]
+	}
+	if len(query["searchType"]) > 0 {
+		searchType = query["searchType"][0]
+	}
+	index := types.RepaymentRecordSearch{
+		Id:         id,
+		PageId:     pageid,
+		SearchType: searchType,
+	}
+	return &index
+}
+
+func (s *SqlCtr) RepaymentRecordToMap(ret []*types.RawRepaymentRecord) []*types.RepaymentRecord {
+
+	return handleRepaymentRecord(ret)
+}
+
 // ////////////////////////////////////////////////////////////////////////////////////////
 // 查询mysql数据库中加密后的发票信息，如果id为空，则查找全部的信息
 func (s *SqlCtr) QueryInvoiceInformation(id string) []string {
 	var ret []string
 	if id == "" {
-		ret, _ = s.QueryInvoiceByOrder(InvoiceSQLQueryAll)
+		ret, _ = s.QueryInvoiceByOrder(s.orders.InvoiceSQLQueryAll)
 	} else {
-		ret, _ = s.QueryInvoiceByOrder(InvoiceSQLQueryByID + id)
+		ret, _ = s.QueryInvoiceByOrder(s.orders.InvoiceSQLQueryByID + id)
 	}
 	return ret
 }
 func (s *SqlCtr) QueryInvoiceInforsBySQLID(_id_ string) []string {
 	var ret []string
-	ret, _ = s.QueryInvoiceByOrder(InvoiceSQLQueryBy_ID + _id_)
+	ret, _ = s.QueryInvoiceByOrder(s.orders.InvoiceSQLQueryBy_ID + _id_)
 	return ret
 }
 func (s *SqlCtr) QueryInvoiceInformationLength() int {
 	var length int
-	err := s.db.QueryRow(InvoiceSQLQueryLength).Scan(&length)
+	err := s.db.QueryRow(s.orders.InvoiceSQLQueryLength).Scan(&length)
 	if err != nil {
 		logrus.Fatalln(err)
 	}
@@ -303,59 +294,59 @@ func (s *SqlCtr) QueryInvoiceInformationLength() int {
 func (s *SqlCtr) QueryHistoricalTransUsedInfos(id string) []string {
 	var ret []string
 	if id == "" {
-		ret, _ = s.QueryHistoricalTransByOrder(HistoricalUsedSQLQueryAll)
+		ret, _ = s.QueryHistoricalTransByOrder(s.orders.HistoricalUsedSQLQueryAll)
 	} else {
-		ret, _ = s.QueryHistoricalTransByOrder(HistoricalUsedSQLQueryByID + id)
+		ret, _ = s.QueryHistoricalTransByOrder(s.orders.HistoricalUsedSQLQueryByID + id)
 	}
 	return ret
 }
 func (s *SqlCtr) QueryHistoricalTransUsedInfosBySQLID(_id_ string) []string {
 	var ret []string
-	ret, _ = s.QueryHistoricalTransByOrder(HistoricalUsedSQLQueryBy_ID + _id_)
+	ret, _ = s.QueryHistoricalTransByOrder(s.orders.HistoricalUsedSQLQueryBy_ID + _id_)
 	return ret
 }
 
 func (s *SqlCtr) QueryHistoricalTransSettleInfos(id string) []string {
 	var ret []string
 	if id == "" {
-		ret, _ = s.QueryHistoricalTransByOrder(HistoricalSettleSQLQueryAll)
+		ret, _ = s.QueryHistoricalTransByOrder(s.orders.HistoricalSettleSQLQueryAll)
 	} else {
-		ret, _ = s.QueryHistoricalTransByOrder(HistoricalSettleSQLQueryByID + id)
+		ret, _ = s.QueryHistoricalTransByOrder(s.orders.HistoricalSettleSQLQueryByID + id)
 	}
 	return ret
 }
 func (s *SqlCtr) QueryHistoricalTransSettleInfosBySQLID(_id_ string) []string {
 	var ret []string
-	ret, _ = s.QueryHistoricalTransByOrder(HistoricalSettleSQLQueryBy_ID + _id_)
+	ret, _ = s.QueryHistoricalTransByOrder(s.orders.HistoricalSettleSQLQueryBy_ID + _id_)
 	return ret
 }
 func (s *SqlCtr) QueryHistoricalTransOrderInfos(id string) []string {
 	var ret []string
 	if id == "" {
-		ret, _ = s.QueryHistoricalTransByOrder(HistoricalOrderSQLQueryAll)
+		ret, _ = s.QueryHistoricalTransByOrder(s.orders.HistoricalOrderSQLQueryAll)
 	} else {
-		ret, _ = s.QueryHistoricalTransByOrder(HistoricalOrderSQLQueryByID + id)
+		ret, _ = s.QueryHistoricalTransByOrder(s.orders.HistoricalOrderSQLQueryByID + id)
 	}
 	return ret
 }
 func (s *SqlCtr) QueryHistoricalTransOrderInfosBySQLID(_id_ string) []string {
 	var ret []string
-	ret, _ = s.QueryHistoricalTransByOrder(HistoricalOrderSQLQueryBy_ID + _id_)
+	ret, _ = s.QueryHistoricalTransByOrder(s.orders.HistoricalOrderSQLQueryBy_ID + _id_)
 	return ret
 }
 
 func (s *SqlCtr) QueryHistoricalTransReceivableInfos(id string) []string {
 	var ret []string
 	if id == "" {
-		ret, _ = s.QueryHistoricalTransByOrder(HistoricalReceivableSQLQueryAll)
+		ret, _ = s.QueryHistoricalTransByOrder(s.orders.HistoricalReceivableSQLQueryAll)
 	} else {
-		ret, _ = s.QueryHistoricalTransByOrder(HistoricalReceivableSQLQueryByID + id)
+		ret, _ = s.QueryHistoricalTransByOrder(s.orders.HistoricalReceivableSQLQueryByID + id)
 	}
 	return ret
 }
 func (s *SqlCtr) QueryHistoricalTransReceivableInfosBySQLID(_id_ string) []string {
 	var ret []string
-	ret, _ = s.QueryHistoricalTransByOrder(HistoricalReceivableSQLQueryBy_ID + _id_)
+	ret, _ = s.QueryHistoricalTransByOrder(s.orders.HistoricalReceivableSQLQueryBy_ID + _id_)
 	return ret
 }
 
@@ -363,29 +354,29 @@ func (s *SqlCtr) QueryHistoricalTransReceivableInfosBySQLID(_id_ string) []strin
 func (s *SqlCtr) QueryEnterpoolDataPlanInfos(id string) []string {
 	var ret []string
 	if id == "" {
-		ret, _ = s.QueryPoolDataByOrder(EnterPoolPlanSQLQueryAll)
+		ret, _ = s.QueryPoolDataByOrder(s.orders.EnterPoolPlanSQLQueryAll)
 	} else {
-		ret, _ = s.QueryPoolDataByOrder(EnterPoolPlanSQLQueryByID + id)
+		ret, _ = s.QueryPoolDataByOrder(s.orders.EnterPoolPlanSQLQueryByID + id)
 	}
 	return ret
 }
 func (s *SqlCtr) QueryEnterpoolDataPlanInfosBySQLID(_id_ string) []string {
 	var ret []string
-	ret, _ = s.QueryPoolDataByOrder(EnterPoolPlanSQLQueryBy_ID + _id_)
+	ret, _ = s.QueryPoolDataByOrder(s.orders.EnterPoolPlanSQLQueryBy_ID + _id_)
 	return ret
 }
 func (s *SqlCtr) QueryEnterpoolDataUsedInfos(id string) []string {
 	var ret []string
 	if id == "" {
-		ret, _ = s.QueryPoolDataByOrder(EnterPoolUsedSQLQueryAll)
+		ret, _ = s.QueryPoolDataByOrder(s.orders.EnterPoolUsedSQLQueryAll)
 	} else {
-		ret, _ = s.QueryPoolDataByOrder(EnterPoolUsedSQLQueryByID + id)
+		ret, _ = s.QueryPoolDataByOrder(s.orders.EnterPoolUsedSQLQueryByID + id)
 	}
 	return ret
 }
 func (s *SqlCtr) QueryEnterpoolDataUsedInfosBySQLID(_id_ string) []string {
 	var ret []string
-	ret, _ = s.QueryPoolDataByOrder(EnterPoolUsedSQLQueryBy_ID + _id_)
+	ret, _ = s.QueryPoolDataByOrder(s.orders.EnterPoolUsedSQLQueryBy_ID + _id_)
 	return ret
 }
 
@@ -394,15 +385,15 @@ func (s *SqlCtr) QueryEnterpoolDataUsedInfosBySQLID(_id_ string) []string {
 func (s *SqlCtr) QueryFinancingIntention(id string) []string {
 	var ret []string
 	if id == "" {
-		ret, _ = s.QueryFinancingByOrder(FinancingSQLQueryAll)
+		ret, _ = s.QueryFinancingByOrder(s.orders.FinancingSQLQueryAll)
 	} else {
-		ret, _ = s.QueryFinancingByOrder(FinancingSQLQueryByID + id)
+		ret, _ = s.QueryFinancingByOrder(s.orders.FinancingSQLQueryByID + id)
 	}
 	return ret
 }
 func (s *SqlCtr) QueryFinancingIntentionBySQLID(_id_ string) []string {
 	var ret []string
-	ret, _ = s.QueryFinancingByOrder(FinancingSQLQueryBy_ID + _id_)
+	ret, _ = s.QueryFinancingByOrder(s.orders.FinancingSQLQueryBy_ID + _id_)
 	return ret
 }
 
@@ -411,15 +402,15 @@ func (s *SqlCtr) QueryFinancingIntentionBySQLID(_id_ string) []string {
 func (s *SqlCtr) QueryCollectionAccount(id string) []string {
 	var ret []string
 	if id == "" {
-		ret, _ = s.QueryAccountsByOrder(AccountsSQLQueryAll)
+		ret, _ = s.QueryAccountsByOrder(s.orders.AccountsSQLQueryAll)
 	} else {
-		ret, _ = s.QueryAccountsByOrder(AccountsSQLQueryByID + id)
+		ret, _ = s.QueryAccountsByOrder(s.orders.AccountsSQLQueryByID + id)
 	}
 	return ret
 }
 func (s *SqlCtr) QueryCollectionAccountBySQLID(_id_ string) []string {
 	var ret []string
-	ret, _ = s.QueryAccountsByOrder(AccountsSQLQueryBy_ID + _id_)
+	ret, _ = s.QueryAccountsByOrder(s.orders.AccountsSQLQueryBy_ID + _id_)
 	return ret
 }
 
@@ -427,15 +418,31 @@ func (s *SqlCtr) QueryCollectionAccountBySQLID(_id_ string) []string {
 func (s *SqlCtr) QueryFinancingContract(id string) []*types.RawFinancingContractData {
 	var ret []*types.RawFinancingContractData
 	if id == "" {
-		ret, _ = s.QueryFinancingContractByOrder(FinancingContractSQLAll)
+		ret, _ = s.QueryFinancingContractByOrder(s.orders.FinancingContractSQLAll)
 	} else {
-		ret, _ = s.QueryFinancingContractByOrder(AccountsSQLQueryByID + id)
+		ret, _ = s.QueryFinancingContractByOrder(s.orders.AccountsSQLQueryByID + id)
 	}
 	return ret
 }
 func (s *SqlCtr) QueryFinancingContractBySQLID(_id_ string) []*types.RawFinancingContractData {
 	var ret []*types.RawFinancingContractData
-	ret, _ = s.QueryFinancingContractByOrder(AccountsSQLQueryBy_ID + _id_)
+	ret, _ = s.QueryFinancingContractByOrder(s.orders.AccountsSQLQueryBy_ID + _id_)
+	return ret
+}
+
+// //////////////////////////////////////////////////////////////////////////////////////////
+func (s *SqlCtr) QueryRepaymentRecord(id string) []*types.RawRepaymentRecord {
+	var ret []*types.RawRepaymentRecord
+	if id == "" {
+		ret, _ = s.QueryRepaymentRecordByOrder(s.orders.RepaymentRecordSQLAll)
+	} else {
+		ret, _ = s.QueryRepaymentRecordByOrder(s.orders.AccountsSQLQueryByID + id)
+	}
+	return ret
+}
+func (s *SqlCtr) QueryRepaymentRecordBySQLID(_id_ string) []*types.RawRepaymentRecord {
+	var ret []*types.RawRepaymentRecord
+	ret, _ = s.QueryRepaymentRecordByOrder(s.orders.AccountsSQLQueryBy_ID + _id_)
 	return ret
 }
 
@@ -647,6 +654,30 @@ func (s *SqlCtr) QueryFinancingContractByOrder(order string) ([]*types.RawFinanc
 	for rows.Next() {
 		record := &types.RawFinancingContractData{}
 		err = rows.Scan(&record.SQLId, &record.Num, &record.Status, &record.ID, &record.FinancingID, &record.CustomerID, &record.CorpName, &record.DebtMoney, &record.SupplyDate, &record.ExpireDate, &record.Balance)
+		if err != nil {
+			logrus.Errorln(err)
+			count++
+			continue
+		}
+		ret = append(ret, record)
+	}
+	return ret, nil
+}
+
+func (s *SqlCtr) QueryRepaymentRecordByOrder(order string) ([]*types.RawRepaymentRecord, error) {
+	in_stmt, err := s.db.Prepare(order)
+	if err != nil {
+		return nil, err
+	}
+	rows, err := in_stmt.Query()
+	if err != nil {
+		return nil, err
+	}
+	ret := make([]*types.RawRepaymentRecord, 0)
+	count := 0
+	for rows.Next() {
+		record := &types.RawRepaymentRecord{}
+		err = rows.Scan(&record.SQLId, &record.Num, &record.Status, &record.ID, &record.FinancingID, &record.CustomerID, &record.Repay, &record.Time)
 		if err != nil {
 			logrus.Errorln(err)
 			count++

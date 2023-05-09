@@ -41,6 +41,11 @@ type FinancingContractSearch struct {
 	PageId     string
 	SearchType string
 }
+type RepaymentRecordSearch struct {
+	Id         string
+	PageId     string
+	SearchType string
+}
 type SelectedInfoToApplication struct {
 	Invoice []InvoiceInformation `json:"invoice"`
 	// HistoryInfo []TransactionHistory `json:"historyInfo"`

@@ -21,6 +21,7 @@ type Server struct {
 	redisFinancingIntention *redis.RedisOperator
 	redisCollectionAccount  *redis.RedisOperator
 	redisFinancingContract  *redis.RedisOperator
+	tables                  *conf.Config
 	canal                   *canal.Connector
 }
 
@@ -50,6 +51,7 @@ func NewServer() *Server {
 		redisCollectionAccount:  collectAccount,
 		redisFinancingContract:  finangcingContract,
 		canal:                   canal,
+		tables:                  config,
 	}
 }
 
@@ -93,65 +95,71 @@ func (s *Server) DumpFromCanal() {
 		time.Sleep(3 * time.Second)
 		s.canal.Lock.Lock()
 		fmt.Println(s.canal.RawData)
-		if len(s.canal.RawData[canal.Invoice]) != 0 {
+		if len(s.canal.RawData[s.tables.InvoiceInfos]) != 0 {
 			messages := make([]*types.RawCanalData, 0)
-			messages = append(messages, s.canal.RawData[canal.Invoice]...)
-			delete(s.canal.RawData, canal.Invoice)
+			messages = append(messages, s.canal.RawData[s.tables.InvoiceInfos]...)
+			delete(s.canal.RawData, s.tables.InvoiceInfos)
 			s.CannalStoreInvoiceToredis(messages)
 		}
-		if len(s.canal.RawData[canal.Intension]) != 0 {
+		if len(s.canal.RawData[s.tables.FinanceApplication]) != 0 {
 			messages := make([]*types.RawCanalData, 0)
-			messages = append(messages, s.canal.RawData[canal.Intension]...)
-			delete(s.canal.RawData, canal.Intension)
+			messages = append(messages, s.canal.RawData[s.tables.FinanceApplication]...)
+			delete(s.canal.RawData, s.tables.FinanceApplication)
 			s.CannalStoreIntensionToredis(messages)
 		}
-		if len(s.canal.RawData[canal.Accounts]) != 0 {
+		if len(s.canal.RawData[s.tables.Accounts]) != 0 {
 			messages := make([]*types.RawCanalData, 0)
-			messages = append(messages, s.canal.RawData[canal.Accounts]...)
-			delete(s.canal.RawData, canal.Accounts)
+			messages = append(messages, s.canal.RawData[s.tables.Accounts]...)
+			delete(s.canal.RawData, s.tables.Accounts)
 			s.CannalStoreAccountsToredis(messages)
 		}
-		if len(s.canal.RawData[canal.HisOrder]) != 0 {
+		if len(s.canal.RawData[s.tables.HistoricalOrder]) != 0 {
 			messages := make([]*types.RawCanalData, 0)
-			messages = append(messages, s.canal.RawData[canal.HisOrder]...)
-			delete(s.canal.RawData, canal.HisOrder)
+			messages = append(messages, s.canal.RawData[s.tables.HistoricalOrder]...)
+			delete(s.canal.RawData, s.tables.HistoricalOrder)
 			s.CannalStoreHisOrderToredis(messages)
 		}
-		if len(s.canal.RawData[canal.HisReceivable]) != 0 {
+		if len(s.canal.RawData[s.tables.HistoricalReceivable]) != 0 {
 			messages := make([]*types.RawCanalData, 0)
-			messages = append(messages, s.canal.RawData[canal.HisReceivable]...)
-			delete(s.canal.RawData, canal.HisReceivable)
+			messages = append(messages, s.canal.RawData[s.tables.HistoricalReceivable]...)
+			delete(s.canal.RawData, s.tables.HistoricalReceivable)
 			s.CannalStoreHisReceivableToredis(messages)
 		}
-		if len(s.canal.RawData[canal.HisSettle]) != 0 {
+		if len(s.canal.RawData[s.tables.HistoricalSettle]) != 0 {
 			messages := make([]*types.RawCanalData, 0)
-			messages = append(messages, s.canal.RawData[canal.HisSettle]...)
-			delete(s.canal.RawData, canal.HisSettle)
+			messages = append(messages, s.canal.RawData[s.tables.HistoricalSettle]...)
+			delete(s.canal.RawData, s.tables.HistoricalSettle)
 			s.CannalStoreHisSettleToredis(messages)
 		}
-		if len(s.canal.RawData[canal.HisUsed]) != 0 {
+		if len(s.canal.RawData[s.tables.HistoricalUsed]) != 0 {
 			messages := make([]*types.RawCanalData, 0)
-			messages = append(messages, s.canal.RawData[canal.HisUsed]...)
-			delete(s.canal.RawData, canal.HisUsed)
+			messages = append(messages, s.canal.RawData[s.tables.HistoricalUsed]...)
+			delete(s.canal.RawData, s.tables.HistoricalUsed)
 			s.CannalStoreHisUsedToredis(messages)
 		}
-		if len(s.canal.RawData[canal.PoolPlan]) != 0 {
+		if len(s.canal.RawData[s.tables.PoolPlanInfos]) != 0 {
 			messages := make([]*types.RawCanalData, 0)
-			messages = append(messages, s.canal.RawData[canal.PoolPlan]...)
-			delete(s.canal.RawData, canal.PoolPlan)
+			messages = append(messages, s.canal.RawData[s.tables.PoolPlanInfos]...)
+			delete(s.canal.RawData, s.tables.PoolPlanInfos)
 			s.CannalStoreEnterPoolPlanToredis(messages)
 		}
-		if len(s.canal.RawData[canal.PoolUsed]) != 0 {
+		if len(s.canal.RawData[s.tables.PoolUsedInfos]) != 0 {
 			messages := make([]*types.RawCanalData, 0)
-			messages = append(messages, s.canal.RawData[canal.PoolUsed]...)
-			delete(s.canal.RawData, canal.PoolUsed)
+			messages = append(messages, s.canal.RawData[s.tables.PoolUsedInfos]...)
+			delete(s.canal.RawData, s.tables.PoolUsedInfos)
 			s.CannalStoreEnterPoolUsedToredis(messages)
 		}
-		if len(s.canal.RawData[canal.FinancingContract]) != 0 {
+		if len(s.canal.RawData[s.tables.FinanceContract]) != 0 {
 			messages := make([]*types.RawCanalData, 0)
-			messages = append(messages, s.canal.RawData[canal.FinancingContract]...)
-			delete(s.canal.RawData, canal.FinancingContract)
-			s.CannalStoreEnterPoolUsedToredis(messages)
+			messages = append(messages, s.canal.RawData[s.tables.FinanceContract]...)
+			delete(s.canal.RawData, s.tables.FinanceContract)
+			s.CannalStoreFinancingContractToredis(messages)
+		}
+		if len(s.canal.RawData[s.tables.RepaymentRecord]) != 0 {
+			messages := make([]*types.RawCanalData, 0)
+			messages = append(messages, s.canal.RawData[s.tables.RepaymentRecord]...)
+			delete(s.canal.RawData, s.tables.RepaymentRecord)
+			s.CannalStoreRepaymentRecordToredis(messages)
 		}
 		s.canal.Lock.Unlock()
 	}
@@ -344,5 +352,13 @@ func (s *Server) CannalStoreFinancingContractToredis(datas []*types.RawCanalData
 		rawContracts := s.sql.QueryFinancingContractBySQLID(string(data.SQLId))
 		contracts := s.sql.FinancingContractToMap(rawContracts)
 		s.StoreFinancingContractToRedis(contracts)
+	}
+}
+func (s *Server) CannalStoreRepaymentRecordToredis(datas []*types.RawCanalData) {
+	for _, data := range datas {
+		//TODO
+		rawRecord := s.sql.QueryRepaymentRecordBySQLID(string(data.SQLId))
+		contracts := s.sql.RepaymentRecordToMap(rawRecord)
+		// s.StoreFinancingContractToRedis(contracts)
 	}
 }

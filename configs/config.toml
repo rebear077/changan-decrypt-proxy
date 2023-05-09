@@ -20,6 +20,65 @@ CanalPassword="canal"
 CanalDestination="example"
 CanalConnectedDB="db_node0"
 
+[SubscribeTable]
+FinanceContract="u_t_finance_contract1"
+HistoricalOrder="u_t_history_order_information3"
+HistoricalReceivable="u_t_history_receivable_information3"
+HistoricalSettle="u_t_history_settle_information4"
+HistoricalUsed="u_t_history_used_information3"
+InvoiceInfos="u_t_invoice_information3"
+PoolPlanInfos="u_t_pool_plan_information2"
+PookUsedInfos="u_t_pool_used_information2"
+Accounts="u_t_push_payment_accounts"
+RepaymentRecord="u_t_repayment_record"
+FinanceApplication="u_t_supplier_financing_application2"
 
 [log]
 Path="./"
+
+[SQLOrder]
+# 发票信息
+InvoiceSQLQueryAll    = "select * from u_t_invoice_information3"
+InvoiceSQLQueryByID   = "select * from u_t_invoice_information3 where id ="
+InvoiceSQLQueryBy_ID  = "select * from u_t_invoice_information3 where _id_= "
+InvoiceSQLQueryLength = "select count(*) from u_t_invoice_information3"
+# 历史交易信息-used信息
+HistoricalUsedSQLQueryAll   = "select * from u_t_history_used_information3"
+HistoricalUsedSQLQueryByID  = "select * from u_t_history_used_information3 where id = "
+HistoricalUsedSQLQueryBy_ID = "select * from u_t_history_used_information3 where _id_= "
+# 历史交易信息-settle信息
+HistoricalSettleSQLQueryAll   = "select * from u_t_history_settle_information4"
+HistoricalSettleSQLQueryByID  = "select * from u_t_history_settle_information4 where id = "
+HistoricalSettleSQLQueryBy_ID = "select * from u_t_history_settle_information4 where _id_= "
+#历史交易信息-order信息
+HistoricalOrderSQLQueryAll   = "select * from u_t_history_order_information3"
+HistoricalOrderSQLQueryByID  = "select * from u_t_history_order_information3 where id = "
+HistoricalOrderSQLQueryBy_ID = "select * from u_t_history_order_information3 where _id_= "
+#历史交易信息-receivalble信息
+HistoricalReceivableSQLQueryAll   = "select * from u_t_history_receivable_information3"
+HistoricalReceivableSQLQueryByID  = "select * from u_t_history_receivable_information3 where id = "
+HistoricalReceivableSQLQueryBy_ID = "select * from u_t_history_receivable_information3 where _id_= "
+# 入池数据-plan信息
+EnterPoolPlanSQLQueryAll   = "select * from u_t_pool_plan_information2"
+EnterPoolPlanSQLQueryByID  = "select * from u_t_pool_plan_information2 where id = "
+EnterPoolPlanSQLQueryBy_ID = "select * from u_t_pool_plan_information2 where _id_= "
+#入池数据-used信息
+EnterPoolUsedSQLQueryAll   = "select * from u_t_pool_used_information2"
+EnterPoolUsedSQLQueryByID  = "select * from u_t_pool_used_information2 where id = "
+EnterPoolUsedSQLQueryBy_ID = "select * from u_t_pool_used_information2 where _id_= "
+#融资意向信息
+FinancingSQLQueryAll   = "select * from u_t_supplier_financing_application1"
+FinancingSQLQueryByID  = "select * from u_t_supplier_financing_application1 where id = "
+FinancingSQLQueryBy_ID = "select * from u_t_supplier_financing_application1 where _id_= "
+#回款账户信息
+AccountsSQLQueryAll   = "select * from u_t_push_payment_accounts"
+AccountsSQLQueryByID  = "select * from u_t_push_payment_accounts where id = "
+AccountsSQLQueryBy_ID = "select * from u_t_push_payment_accounts where _id_= "
+# 借贷合同信息
+FinancingContractSQLAll   = "select * from u_t_finance_contract1"
+FinancingContractSQLByID  = "select * from u_t_finance_contract1 where id="
+FinancingContractSQLBy_ID = "select * from u_t_finance_contract1 where _id_="
+#还款记录
+RepaymentRecordSQLAll=""
+RepaymentRecordSQLByID=""
+RepaymentRecordSQLBy_ID=""
