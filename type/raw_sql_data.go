@@ -3,6 +3,8 @@ package types
 type RawCanalData struct {
 	SQLId []byte
 }
+
+// 数据库中原生发票数据
 type RawInvoiceData struct {
 	SQLId      string
 	Num        string
@@ -18,6 +20,8 @@ type RawInvoiceData struct {
 	Owner      string
 }
 
+// 数据库中原生历史交易信息
+// 四种公用一种数据结构
 type RawHistoryTransData struct {
 	SqlId          string
 	Num            string
@@ -32,6 +36,7 @@ type RawHistoryTransData struct {
 	Owner          string
 }
 
+// 数据库中原生入池信息
 type RawEnterPoolData struct {
 	SqlId          string
 	Num            string
@@ -44,6 +49,8 @@ type RawEnterPoolData struct {
 	Hash           string
 	Owner          string
 }
+
+// 数据库中原生的融资意向申请
 type RawFinancingData struct {
 	SQLId     string
 	Num       string
@@ -53,9 +60,10 @@ type RawFinancingData struct {
 	Data      string
 	Key       string
 	Hash      string
+	State     string
 }
 
-// 服务于回款账户
+// 数据库中原生回款账户
 type RawAccountsData struct {
 	SQLId  string
 	Num    string
@@ -65,6 +73,8 @@ type RawAccountsData struct {
 	Key    string
 	Hash   string
 }
+
+// 数据库中原生借贷合同信息
 type RawFinancingContractData struct {
 	SQLId       string
 	Num         string
@@ -79,7 +89,19 @@ type RawFinancingContractData struct {
 	Balance     string
 }
 
-// 发票信息推送接口
+// 数据库中原生的还款记录
+type RawRepaymentRecord struct {
+	SQLId       string
+	Num         string
+	Status      string
+	ID          string
+	FinancingID string
+	CustomerID  string
+	Repay       string
+	Time        string
+}
+
+// 发票信息查询
 type InvoiceInformation struct {
 	Certificateid   string `json:"certificateId"`
 	Customerid      string `json:"customerId"`
@@ -101,6 +123,7 @@ type InvoiceInformation struct {
 	Owner           string `json:"Owner"`
 }
 
+// 返回给前端的发票信息
 type InvoiceInformationReturn struct {
 	InvoiceInformationList []*InvoiceInformation `json:"invoiceInformationList"`
 	TotalCount             int                   `json:"totalcount"`
@@ -122,12 +145,14 @@ type TransactionHistory struct {
 	Receivableinfos []Receivableinfos `json:"receivableInfos"`
 }
 
+// 返回给前端的历史交易信息
 type TransactionHistoryReturn struct {
 	TransactionHistoryList []*TransactionHistory `json:"transactionHistoryList"`
 	TotalCount             int                   `json:"totalcount"`
 	CurrentPage            int                   `json:"currentPage"`
 }
 
+// 历史交易信息
 type TransactionHistoryHeader struct {
 	Customergrade   string `json:"customerGrade"`
 	Certificatetype string `json:"certificateType"`
@@ -201,6 +226,8 @@ type Receivableinfos struct {
 	Receivableamount string `json:"ReceivableAmount"`
 	Ccy              string `json:"Ccy"`
 }
+
+// 入池信息
 type EnterpoolDataHeader struct {
 	Datetimepoint     string `json:"dateTimePoint"`
 	Ccy               string `json:"ccy"`
@@ -270,8 +297,10 @@ type FinancingIntention struct {
 	Cooperationyears   string `json:"CooperationYears"`
 	Certificatetype    string `json:"CertificateType"`
 	Intercustomerid    string `json:"InterCustomerId"`
+	State              string `json:"State"`
 }
 
+// 返回给前端的融资意向数据结构
 type FinancingIntentionReturn struct {
 	FinancingIntentionList []*FinancingIntention `json:"financingIntentionList"`
 	TotalCount             int                   `json:"totalcount"`
@@ -338,4 +367,9 @@ type RepaymentRecord struct {
 	CustomerID      string `json:"CustomerID"`
 	Time            string `json:"Time"`
 	RepaymentAmount string `json:"RepaymentAmount"`
+}
+type RepaymentRecordReturn struct {
+	RepaymentList []*RepaymentRecord `json:"repaymentRecordList"`
+	TotalCount    int                `json:"totalcount"`
+	CurrentPage   int                `json:"currentPage"`
 }
