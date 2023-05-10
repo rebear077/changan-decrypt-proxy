@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	server "github.com/FISCO-BCOS/go-sdk/backend"
+	"github.com/FISCO-BCOS/go-sdk/conf"
 	"github.com/FISCO-BCOS/go-sdk/proxy"
 	sql "github.com/FISCO-BCOS/go-sdk/sqlController"
 	types "github.com/FISCO-BCOS/go-sdk/type"
@@ -20,12 +21,18 @@ import (
 
 type FrontEnd struct {
 	Server *server.Server
+	url    *conf.Config
 }
 
 func NewFrontEnd() *FrontEnd {
 	server := server.NewServer()
-
+	configs, err := conf.ParseConfigFile("./configs/config.toml")
+	if err != nil {
+		logrus.Fatalln(err)
+	}
+	config := &configs[0]
 	return &FrontEnd{
+		url:    config,
 		Server: server,
 	}
 }
@@ -241,7 +248,7 @@ func (front *FrontEnd) Relay(w http.ResponseWriter, r *http.Request) {
 	if jsonSring != "" {
 		relaybody = []byte(jsonSring)
 	}
-	url := "http://127.0.0.1:8545"
+	url := front.url.FiscoUrl
 	body := string(relaybody)
 	response, err := http.Post(url, "application/json", bytes.NewBuffer([]byte(body))) //将获取的jsonrpc命令直接转发给url指定的fisco地址
 	if err != nil {
@@ -273,7 +280,7 @@ func (front *FrontEnd) ParesTXInfo(w http.ResponseWriter, r *http.Request) {
 	if jsonCommand.Method != "getBlockByNumber_sp" && jsonCommand.Method != "getBlockByNumber_all" {
 
 		client := &http.Client{}
-		url := "http://127.0.0.1:8545"
+		url := front.url.FiscoUrl
 		body := string(relaybody)
 
 		buffer := []byte(body)
@@ -320,7 +327,7 @@ func (front *FrontEnd) ParesTXInfo(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(string(relaybody_count))
 
 		client := &http.Client{}
-		url := "http://127.0.0.1:8545"
+		url := front.url.FiscoUrl
 		//body := string(relaybody)
 
 		buffer := []byte(relaybody_count)
@@ -374,7 +381,7 @@ func (front *FrontEnd) ParesTXInfo(w http.ResponseWriter, r *http.Request) {
 			block, _ = json.Marshal(jsonCommand)
 
 			client := &http.Client{}
-			url := "http://127.0.0.1:8545"
+			url := front.url.FiscoUrl
 			//body := string(relaybody)
 
 			buffer := []byte(block)
@@ -432,7 +439,7 @@ func (front *FrontEnd) ParesTXInfo(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(string(relaybody_sp))
 
 		client := &http.Client{}
-		url := "http://127.0.0.1:8545"
+		url := front.url.FiscoUrl
 		//body := string(relaybody)
 
 		buffer := []byte(relaybody_sp)

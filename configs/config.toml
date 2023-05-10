@@ -5,9 +5,14 @@ MslPasswd="123456"
 MslName="db_node0"
 MslProtocol="tcp"
 
+[Fisco]
+FiscoUrl="http://127.0.0.1:8545"
+
+
 [Redis]
 RedisUrl="127.0.0.1:6379"
 RedisPassword="123456"
+
 [LogDB]
 LogDBUrl="127.0.0.1:3306"
 LogDBUsername="root"

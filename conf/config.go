@@ -21,6 +21,8 @@ type Config struct {
 	//redis
 	RedisUrl      string
 	RedisPassword string
+	//fisco
+	FiscoUrl string
 	//logDB
 	LogDBUrl      string
 	LogDBUsername string
@@ -146,6 +148,10 @@ func ParseConfig(buffer []byte) ([]Config, error) {
 		config.LogDBPasswd = viper.GetString("LogDB.LogDBPasswd")
 		config.LogDBName = viper.GetString("LogDB.LogDBName")
 		config.LogDBProtocol = viper.GetString("LogDB.LogDBProtocol")
+	}
+	if viper.IsSet("Fisco") {
+		config.FiscoUrl = viper.GetString("Fisco.FiscoUrl")
+
 	}
 	if viper.IsSet("Redis") {
 		config.RedisUrl = viper.GetString("Redis.RedisUrl")
