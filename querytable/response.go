@@ -39,6 +39,7 @@ func unconsistencyCode() string {
 	}`)
 	return string(jsonData)
 }
+
 func verifyConsistency(data types.SelectedInfoToApplication) bool {
 	var checkQueue string = ""
 	for _, invoice := range data.Invoice {
@@ -46,26 +47,6 @@ func verifyConsistency(data types.SelectedInfoToApplication) bool {
 			checkQueue = invoice.Customerid
 		} else {
 			if checkQueue != invoice.Customerid {
-				return false
-			}
-		}
-	}
-	checkQueue = ""
-	for _, historyInfo := range data.HistoryInfo {
-		if checkQueue == "" {
-			checkQueue = historyInfo.Customerid
-		} else {
-			if checkQueue != historyInfo.Customerid {
-				return false
-			}
-		}
-	}
-	checkQueue = ""
-	for _, poolInfo := range data.PoolInfo {
-		if checkQueue == "" {
-			checkQueue = poolInfo.Customerid
-		} else {
-			if checkQueue != poolInfo.Customerid {
 				return false
 			}
 		}

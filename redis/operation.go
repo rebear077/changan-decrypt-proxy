@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/FISCO-BCOS/go-sdk/conf"
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 )
@@ -31,10 +32,15 @@ type Rediser interface {
 
 // 初始化一个redis客户端
 func NewRedisOperator(db int) *RedisOperator {
+	configs, err := conf.ParseConfigFile("./configs/config.toml")
+	if err != nil {
+		logrus.Fatalln(err)
+	}
+	config := &configs[0]
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "123456", // no password set
-		DB:       db,       // use default DB
+		Addr:     config.RedisUrl,
+		Password: config.RedisPassword, // no password set
+		DB:       db,                   // use default DB
 	})
 	return &RedisOperator{
 		rdb: rdb,

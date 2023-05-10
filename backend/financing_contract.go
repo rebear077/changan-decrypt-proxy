@@ -13,7 +13,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// 存储发票信息到redis数据库中
+// 存储借贷合同信息到redis数据库中
 func (s *Server) StoreFinancingContractToRedis(contracts []*types.FinancingContract) {
 	ctx := context.Background()
 	for _, contract := range contracts {
@@ -27,7 +27,7 @@ func (s *Server) StoreFinancingContractToRedis(contracts []*types.FinancingContr
 		values["SupplyDate"] = contract.SupplyDate
 		values["ExpireDate"] = contract.ExpireDate
 		values["Balance"] = contract.Balance
-		err := s.redisInvoice.MultipleSet(ctx, key, values)
+		err := s.redisFinancingContract.MultipleSet(ctx, key, values)
 		if err != nil {
 			logrus.Errorln(err)
 		}
@@ -53,7 +53,8 @@ func (s *Server) SearchFinancingContractFromRedis(order map[string]string) ([]*t
 			return nil, 0
 		}
 	}
-	filterByPageId := s.filterByFinancingContractPageId(contracts, pageid)
+	filterByFinancingID := s.fliterByFinancingID(contracts, order["FinanceId"])
+	filterByPageId := s.filterByFinancingContractPageId(filterByFinancingID, pageid)
 	totalcount := len(filterByPageId)
 	return filterByPageId, totalcount
 }
@@ -83,6 +84,19 @@ func (s *Server) searchFinancingContractByIDFromRedis(id string, order string) [
 	return contracts
 }
 
+// 根据融资请求编号进行过滤，调用此函数前，需要先通过id进行第一次检索
+func (s *Server) fliterByFinancingID(messages []*types.FinancingContract, financeId string) []*types.FinancingContract {
+	if financeId == "" {
+		return messages
+	}
+	result := make([]*types.FinancingContract, 0)
+	for _, message := range messages {
+		if message.FinancingID == financeId {
+			result = append(result, message)
+		}
+	}
+	return result
+}
 func (s *Server) filterByFinancingContractPageId(messages []*types.FinancingContract, financingContractpageid int64) []*types.FinancingContract {
 	start := (financingContractpageid - 1) * 10
 	end := financingContractpageid * 10

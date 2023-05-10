@@ -38,10 +38,12 @@ type CollectionAccountSearch struct {
 }
 type FinancingContractSearch struct {
 	Id         string
+	FinanceId  string
 	PageId     string
 	SearchType string
 }
 type RepaymentRecordSearch struct {
+	FinanceId  string
 	Id         string
 	PageId     string
 	SearchType string

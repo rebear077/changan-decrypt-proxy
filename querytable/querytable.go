@@ -29,6 +29,7 @@ func NewFrontEnd() *FrontEnd {
 		Server: server,
 	}
 }
+
 func (front *FrontEnd) DecryptSelectToApplicationInformation(writer http.ResponseWriter, request *http.Request) {
 	var message types.SelectedInfoToApplication
 	if json.NewDecoder(request.Body).Decode(&message) != nil {
@@ -62,6 +63,8 @@ func (front *FrontEnd) DecryptSelectToApplicationInformation(writer http.Respons
 
 	}
 }
+
+// 发票信息查询URL
 func (front *FrontEnd) DecryptInvoiceInformation(writer http.ResponseWriter, request *http.Request) {
 	order := make(map[string]string)
 	Sql := sql.NewSqlCtr()
@@ -81,6 +84,7 @@ func (front *FrontEnd) DecryptInvoiceInformation(writer http.ResponseWriter, req
 	fmt.Fprint(writer, jsonData)
 }
 
+// 历史交易信息URL
 func (front *FrontEnd) DecryptHistoricaltransaction(writer http.ResponseWriter, request *http.Request) {
 	order := make(map[string]string)
 	Sql := sql.NewSqlCtr()
@@ -99,6 +103,8 @@ func (front *FrontEnd) DecryptHistoricaltransaction(writer http.ResponseWriter, 
 	fmt.Fprint(writer, jsonData)
 
 }
+
+// 入池数据
 func (front *FrontEnd) DecryptEnterPoolData(writer http.ResponseWriter, request *http.Request) {
 	order := make(map[string]string)
 	Sql := sql.NewSqlCtr()
@@ -115,6 +121,8 @@ func (front *FrontEnd) DecryptEnterPoolData(writer http.ResponseWriter, request 
 	jsonData := front.Server.PackToEnterPoolJson(enterpools, totalcount, currentPage)
 	fmt.Fprint(writer, jsonData)
 }
+
+// 融资意向
 func (front *FrontEnd) DecryptIntensionInformation(writer http.ResponseWriter, request *http.Request) {
 	order := make(map[string]string)
 	Sql := sql.NewSqlCtr()
@@ -131,6 +139,8 @@ func (front *FrontEnd) DecryptIntensionInformation(writer http.ResponseWriter, r
 	jsonData := front.Server.PackToIntensionJson(intensions, totalcount, currentPage)
 	fmt.Fprint(writer, jsonData)
 }
+
+// 回款账户
 func (front *FrontEnd) DecryptAccountInformation(writer http.ResponseWriter, request *http.Request) {
 	order := make(map[string]string)
 	Sql := sql.NewSqlCtr()
@@ -145,6 +155,8 @@ func (front *FrontEnd) DecryptAccountInformation(writer http.ResponseWriter, req
 	jsonData := front.Server.PackToAccountJson(accounts, totalcount, currentPage)
 	fmt.Fprint(writer, jsonData)
 }
+
+// 借贷合同
 func (front *FrontEnd) DecryptFinancingContractInformation(writer http.ResponseWriter, request *http.Request) {
 	order := make(map[string]string)
 	Sql := sql.NewSqlCtr()
@@ -154,9 +166,27 @@ func (front *FrontEnd) DecryptFinancingContractInformation(writer http.ResponseW
 	order["pageid"] = slice.PageId
 	currentPage, _ := strconv.Atoi(order["pageid"])
 	order["searchType"] = slice.SearchType
+	order["FinanceId"] = slice.FinanceId
 	fmt.Println(order)
 	contracts, totalcount := front.Server.SearchFinancingContractFromRedis(order)
 	jsonData := front.Server.PackToFinancingContractJson(contracts, totalcount, currentPage)
+	fmt.Fprint(writer, jsonData)
+}
+
+// 还款记录
+func (front *FrontEnd) DecryptRepaymentRecordInformation(writer http.ResponseWriter, request *http.Request) {
+	order := make(map[string]string)
+	Sql := sql.NewSqlCtr()
+	slice := Sql.RepaymentRecordIndex(request)
+	fmt.Println(slice)
+	order["id"] = slice.Id
+	order["pageid"] = slice.PageId
+	currentPage, _ := strconv.Atoi(order["pageid"])
+	order["searchType"] = slice.SearchType
+	order["FinanceId"] = slice.FinanceId
+	fmt.Println(order)
+	records, totalcount := front.Server.SearchRepaymentRecordFromRedis(order)
+	jsonData := front.Server.PackToRepaymentRecordJson(records, totalcount, currentPage)
 	fmt.Fprint(writer, jsonData)
 }
 

@@ -21,6 +21,7 @@ type Server struct {
 	redisFinancingIntention *redis.RedisOperator
 	redisCollectionAccount  *redis.RedisOperator
 	redisFinancingContract  *redis.RedisOperator
+	redisRepaymentRecord    *redis.RedisOperator
 	tables                  *conf.Config
 	canal                   *canal.Connector
 }
@@ -39,6 +40,7 @@ func NewServer() *Server {
 	financingIntention := redis.NewRedisOperator(3)
 	collectAccount := redis.NewRedisOperator(4)
 	finangcingContract := redis.NewRedisOperator(5)
+	repaymentRecord := redis.NewRedisOperator(6)
 	// canal := canal.NewConnector("db0\\.u_t.*")
 	canal := canal.NewConnector(config.CanalConnectedDB + "\\.u_t.*")
 
@@ -50,6 +52,7 @@ func NewServer() *Server {
 		redisFinancingIntention: financingIntention,
 		redisCollectionAccount:  collectAccount,
 		redisFinancingContract:  finangcingContract,
+		redisRepaymentRecord:    repaymentRecord,
 		canal:                   canal,
 		tables:                  config,
 	}
@@ -358,7 +361,7 @@ func (s *Server) CannalStoreRepaymentRecordToredis(datas []*types.RawCanalData) 
 	for _, data := range datas {
 		//TODO
 		rawRecord := s.sql.QueryRepaymentRecordBySQLID(string(data.SQLId))
-		contracts := s.sql.RepaymentRecordToMap(rawRecord)
-		// s.StoreFinancingContractToRedis(contracts)
+		records := s.sql.RepaymentRecordToMap(rawRecord)
+		s.StoreRepaymentRecordToRedis(records)
 	}
 }

@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/FISCO-BCOS/go-sdk/conf"
-	queue "github.com/FISCO-BCOS/go-sdk/structure"
 	types "github.com/FISCO-BCOS/go-sdk/type"
 	"github.com/golang/protobuf/proto"
 	"github.com/sirupsen/logrus"
@@ -18,7 +17,6 @@ import (
 
 type Connector struct {
 	conn    *client.SimpleCanalConnector
-	queue   *queue.CircleQueue
 	RawData map[string][]*types.RawCanalData
 	tables  *conf.Config
 	Lock    sync.RWMutex
@@ -57,11 +55,9 @@ func NewConnector(table string) *Connector {
 		logrus.Errorln(err)
 		os.Exit(1)
 	}
-	queue := queue.NewCircleQueue(20)
 	raw := make(map[string][]*types.RawCanalData)
 	return &Connector{
 		conn:    connector,
-		queue:   queue,
 		RawData: raw,
 		tables:  config,
 	}
@@ -78,7 +74,7 @@ func (c *Connector) Start() {
 		fmt.Println(message)
 		batchId := message.Id
 		if batchId == -1 || len(message.Entries) <= 0 {
-			time.Sleep(1 * time.Second)
+			time.Sleep(3 * time.Second)
 			logrus.Println("===没有数据了===")
 			continue
 		}
@@ -86,7 +82,6 @@ func (c *Connector) Start() {
 	}
 }
 func (c *Connector) dealMessage(entrys []pbe.Entry) {
-	fmt.Println("1223456334")
 	for _, entry := range entrys {
 		fmt.Println(entry.GetEntryType())
 		if entry.GetEntryType() == pbe.EntryType_TRANSACTIONBEGIN || entry.GetEntryType() == pbe.EntryType_TRANSACTIONEND {
@@ -95,81 +90,79 @@ func (c *Connector) dealMessage(entrys []pbe.Entry) {
 		rowChange := pbe.RowChange{}
 		err := proto.Unmarshal(entry.GetStoreValue(), &rowChange)
 		checkError(err)
-		if &rowChange != nil {
-			eventType := rowChange.GetEventType()
-			header := entry.GetHeader()
-			// fmt.Println(fmt.Sprintf("================> binlog[%s : %d],name[%s,%s], eventType: %s", header.GetLogfileName(), header.GetLogfileOffset(), header.GetSchemaName(), header.GetTableName(), header.GetEventType()))
-			switch header.GetTableName() {
-			case c.tables.InvoiceInfos:
-				for _, rowData := range rowChange.GetRowDatas() {
-					if eventType == pbe.EventType_INSERT {
-						c.dealInsertInvoiceMessage(rowData.GetAfterColumns())
+		eventType := rowChange.GetEventType()
+		header := entry.GetHeader()
+		// fmt.Println(fmt.Sprintf("================> binlog[%s : %d],name[%s,%s], eventType: %s", header.GetLogfileName(), header.GetLogfileOffset(), header.GetSchemaName(), header.GetTableName(), header.GetEventType()))
+		switch header.GetTableName() {
+		case c.tables.InvoiceInfos:
+			for _, rowData := range rowChange.GetRowDatas() {
+				if eventType == pbe.EventType_INSERT {
+					c.dealInsertInvoiceMessage(rowData.GetAfterColumns())
 
-					}
 				}
-			case c.tables.FinanceApplication:
-				for _, rowData := range rowChange.GetRowDatas() {
-					if eventType == pbe.EventType_INSERT {
-						c.dealInsertIntensionMessage(rowData.GetAfterColumns())
-					}
-				}
-			case c.tables.Accounts:
-				for _, rowData := range rowChange.GetRowDatas() {
-					if eventType == pbe.EventType_INSERT {
-						c.dealInsertAccountMessage(rowData.GetAfterColumns())
-					}
-				}
-			case c.tables.HistoricalOrder:
-				for _, rowData := range rowChange.GetRowDatas() {
-					if eventType == pbe.EventType_INSERT {
-						c.dealInsertHistoryOrderMessage(rowData.GetAfterColumns())
-					}
-				}
-			case c.tables.HistoricalReceivable:
-				for _, rowData := range rowChange.GetRowDatas() {
-					if eventType == pbe.EventType_INSERT {
-						c.dealInsertHistoryReceivableMessage(rowData.GetAfterColumns())
-					}
-				}
-			case c.tables.HistoricalSettle:
-				for _, rowData := range rowChange.GetRowDatas() {
-					if eventType == pbe.EventType_INSERT {
-						c.dealInsertHistorySettleMessage(rowData.GetAfterColumns())
-					}
-				}
-			case c.tables.HistoricalUsed:
-				for _, rowData := range rowChange.GetRowDatas() {
-					if eventType == pbe.EventType_INSERT {
-						c.dealInsertHistoryUsedMessage(rowData.GetAfterColumns())
-					}
-				}
-			case c.tables.PoolPlanInfos:
-				for _, rowData := range rowChange.GetRowDatas() {
-					if eventType == pbe.EventType_INSERT {
-						c.dealInsertPoolPlanMessage(rowData.GetAfterColumns())
-					}
-				}
-			case c.tables.PoolUsedInfos:
-				for _, rowData := range rowChange.GetRowDatas() {
-					if eventType == pbe.EventType_INSERT {
-						c.dealInsertPoolUsedMessage(rowData.GetAfterColumns())
-					}
-				}
-			case c.tables.FinanceContract:
-				for _, rowData := range rowChange.GetRowDatas() {
-					if eventType == pbe.EventType_INSERT {
-						c.dealInsertFinancingContractMessage(rowData.GetAfterColumns())
-					}
-				}
-			case c.tables.RepaymentRecord:
-				for _, rowData := range rowChange.GetRowDatas() {
-					if eventType == pbe.EventType_INSERT {
-						c.dealInsertRepaymentRecordtMessage(rowData.GetAfterColumns())
-					}
-				}
-			default:
-				logrus.Warnln("未知的数据库")
 			}
+		case c.tables.FinanceApplication:
+			for _, rowData := range rowChange.GetRowDatas() {
+				if eventType == pbe.EventType_INSERT {
+					c.dealInsertIntensionMessage(rowData.GetAfterColumns())
+				}
+			}
+		case c.tables.Accounts:
+			for _, rowData := range rowChange.GetRowDatas() {
+				if eventType == pbe.EventType_INSERT {
+					c.dealInsertAccountMessage(rowData.GetAfterColumns())
+				}
+			}
+		case c.tables.HistoricalOrder:
+			for _, rowData := range rowChange.GetRowDatas() {
+				if eventType == pbe.EventType_INSERT {
+					c.dealInsertHistoryOrderMessage(rowData.GetAfterColumns())
+				}
+			}
+		case c.tables.HistoricalReceivable:
+			for _, rowData := range rowChange.GetRowDatas() {
+				if eventType == pbe.EventType_INSERT {
+					c.dealInsertHistoryReceivableMessage(rowData.GetAfterColumns())
+				}
+			}
+		case c.tables.HistoricalSettle:
+			for _, rowData := range rowChange.GetRowDatas() {
+				if eventType == pbe.EventType_INSERT {
+					c.dealInsertHistorySettleMessage(rowData.GetAfterColumns())
+				}
+			}
+		case c.tables.HistoricalUsed:
+			for _, rowData := range rowChange.GetRowDatas() {
+				if eventType == pbe.EventType_INSERT {
+					c.dealInsertHistoryUsedMessage(rowData.GetAfterColumns())
+				}
+			}
+		case c.tables.PoolPlanInfos:
+			for _, rowData := range rowChange.GetRowDatas() {
+				if eventType == pbe.EventType_INSERT {
+					c.dealInsertPoolPlanMessage(rowData.GetAfterColumns())
+				}
+			}
+		case c.tables.PoolUsedInfos:
+			for _, rowData := range rowChange.GetRowDatas() {
+				if eventType == pbe.EventType_INSERT {
+					c.dealInsertPoolUsedMessage(rowData.GetAfterColumns())
+				}
+			}
+		case c.tables.FinanceContract:
+			for _, rowData := range rowChange.GetRowDatas() {
+				if eventType == pbe.EventType_INSERT {
+					c.dealInsertFinancingContractMessage(rowData.GetAfterColumns())
+				}
+			}
+		case c.tables.RepaymentRecord:
+			for _, rowData := range rowChange.GetRowDatas() {
+				if eventType == pbe.EventType_INSERT {
+					c.dealInsertRepaymentRecordtMessage(rowData.GetAfterColumns())
+				}
+			}
+		default:
+			logrus.Warnln("未知的数据库")
 		}
 	}
 }

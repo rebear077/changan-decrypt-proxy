@@ -18,6 +18,9 @@ type Config struct {
 	MslPasswd   string
 	MslName     string
 	MslProtocol string
+	//redis
+	RedisUrl      string
+	RedisPassword string
 	//logDB
 	LogDBUrl      string
 	LogDBUsername string
@@ -143,6 +146,10 @@ func ParseConfig(buffer []byte) ([]Config, error) {
 		config.LogDBPasswd = viper.GetString("LogDB.LogDBPasswd")
 		config.LogDBName = viper.GetString("LogDB.LogDBName")
 		config.LogDBProtocol = viper.GetString("LogDB.LogDBProtocol")
+	}
+	if viper.IsSet("Redis") {
+		config.RedisUrl = viper.GetString("Redis.RedisUrl")
+		config.RedisPassword = viper.GetString("Redis.RedisPassword")
 	}
 	if viper.IsSet("Canal") {
 		config.CanalIP = viper.GetString("Canal.CanalIP")

@@ -17,11 +17,6 @@ type SqlCtr struct {
 	Decrypter *Decrypter
 }
 
-const (
-//发票查询指令
-
-)
-
 func NewSqlCtr() *SqlCtr {
 	configs, err := conf.ParseConfigFile("./configs/config.toml")
 	if err != nil {
@@ -82,7 +77,6 @@ func (s *SqlCtr) InvoiceInformationIndex(request *http.Request) *types.InvoiceIn
 	return &index
 }
 
-// /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 解析历史交易信息URL
 func (s *SqlCtr) HistoryTransactionIndex(request *http.Request) *types.HistoryTransactionSearch {
 	query := request.URL.Query()
@@ -115,6 +109,8 @@ func (s *SqlCtr) HistoryTransactionIndex(request *http.Request) *types.HistoryTr
 	}
 	return &index
 }
+
+// 解析入池数据URL
 func (s *SqlCtr) PoolDataIndex(request *http.Request) *types.PoolDataSearch {
 	query := request.URL.Query()
 	id := ""
@@ -142,15 +138,7 @@ func (s *SqlCtr) PoolDataIndex(request *http.Request) *types.PoolDataSearch {
 	return &index
 }
 
-// /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// 输入参数是解密后的发票信息，转换成redis存储所需要的数据结构
-func (s *SqlCtr) InvoiceinfoToMap(ret []string) []*types.InvoiceInformation {
-
-	return handleInvoiceInfo(ret)
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// 融资意向申请URL
 func (s *SqlCtr) FinancingIntentionIndex(request *http.Request) *types.FinancingIntentionSearch {
 	query := request.URL.Query()
 	id := ""
@@ -177,12 +165,8 @@ func (s *SqlCtr) FinancingIntentionIndex(request *http.Request) *types.Financing
 	}
 	return &index
 }
-func (s *SqlCtr) IntensioninfoToMap(ret []string) []*types.FinancingIntention {
 
-	return handleFinancingIntention(ret)
-}
-
-// /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 回款账户YRL
 func (s *SqlCtr) CollectionAccountIndex(request *http.Request) *types.CollectionAccountSearch {
 	query := request.URL.Query()
 	id := ""
@@ -204,22 +188,22 @@ func (s *SqlCtr) CollectionAccountIndex(request *http.Request) *types.Collection
 	}
 	return &index
 }
-func (s *SqlCtr) AccountinfoToMap(ret []string) []*types.CollectionAccount {
 
-	return handleCollectionAccount(ret)
-}
-
-// /////////////////////////////////////////////////////////////////////////////
+// 借贷合同URL
 func (s *SqlCtr) FinancingContractIndex(request *http.Request) *types.FinancingContractSearch {
 	query := request.URL.Query()
 	id := ""
 	pageid := "1"
 	searchType := "increase"
+	FinanceId := ""
 	if len(query["id"]) > 0 {
 		id = query["id"][0]
 	}
 	if len(query["pageid"]) > 0 {
 		pageid = query["pageid"][0]
+	}
+	if len(query["FinanceId"]) > 0 {
+		pageid = query["FinanceId"][0]
 	}
 	if len(query["searchType"]) > 0 {
 		searchType = query["searchType"][0]
@@ -228,23 +212,23 @@ func (s *SqlCtr) FinancingContractIndex(request *http.Request) *types.FinancingC
 		Id:         id,
 		PageId:     pageid,
 		SearchType: searchType,
+		FinanceId:  FinanceId,
 	}
 	return &index
 }
 
-func (s *SqlCtr) FinancingContractToMap(ret []*types.RawFinancingContractData) []*types.FinancingContract {
-
-	return handleFinancingContract(ret)
-}
-
-// //////////////////////////////////////////////////////////////////////////////////////////
+// 还款信息URL
 func (s *SqlCtr) RepaymentRecordIndex(request *http.Request) *types.RepaymentRecordSearch {
 	query := request.URL.Query()
 	id := ""
+	FinanceId := ""
 	pageid := "1"
 	searchType := "increase"
 	if len(query["id"]) > 0 {
 		id = query["id"][0]
+	}
+	if len(query["id"]) > 0 {
+		FinanceId = query["FinanceId"][0]
 	}
 	if len(query["pageid"]) > 0 {
 		pageid = query["pageid"][0]
@@ -256,13 +240,40 @@ func (s *SqlCtr) RepaymentRecordIndex(request *http.Request) *types.RepaymentRec
 		Id:         id,
 		PageId:     pageid,
 		SearchType: searchType,
+		FinanceId:  FinanceId,
 	}
 	return &index
 }
 
+// /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 将需要解密的数据，解密后打包成结构体
+// 输入参数是解密后的发票信息，转换成redis存储所需要的数据结构
+func (s *SqlCtr) InvoiceinfoToMap(ret []string) []*types.InvoiceInformation {
+	return HandleInvoiceInfo(ret)
+}
+
+// 打包融资意向申请
+func (s *SqlCtr) IntensioninfoToMap(ret []string) []*types.FinancingIntention {
+
+	return HandleFinancingIntention(ret)
+}
+
+// 打包回款账户信息
+func (s *SqlCtr) AccountinfoToMap(ret []string) []*types.CollectionAccount {
+
+	return HandleCollectionAccount(ret)
+}
+
+// 打包借贷合同
+func (s *SqlCtr) FinancingContractToMap(ret []*types.RawFinancingContractData) []*types.FinancingContract {
+
+	return HandleFinancingContract(ret)
+}
+
+// 打包还款信息
 func (s *SqlCtr) RepaymentRecordToMap(ret []*types.RawRepaymentRecord) []*types.RepaymentRecord {
 
-	return handleRepaymentRecord(ret)
+	return HandleRepaymentRecord(ret)
 }
 
 // ////////////////////////////////////////////////////////////////////////////////////////
@@ -420,13 +431,13 @@ func (s *SqlCtr) QueryFinancingContract(id string) []*types.RawFinancingContract
 	if id == "" {
 		ret, _ = s.QueryFinancingContractByOrder(s.orders.FinancingContractSQLAll)
 	} else {
-		ret, _ = s.QueryFinancingContractByOrder(s.orders.AccountsSQLQueryByID + id)
+		ret, _ = s.QueryFinancingContractByOrder(s.orders.FinancingContractSQLByID + id)
 	}
 	return ret
 }
 func (s *SqlCtr) QueryFinancingContractBySQLID(_id_ string) []*types.RawFinancingContractData {
 	var ret []*types.RawFinancingContractData
-	ret, _ = s.QueryFinancingContractByOrder(s.orders.AccountsSQLQueryBy_ID + _id_)
+	ret, _ = s.QueryFinancingContractByOrder(s.orders.FinancingContractSQLBy_ID + _id_)
 	return ret
 }
 
@@ -436,17 +447,18 @@ func (s *SqlCtr) QueryRepaymentRecord(id string) []*types.RawRepaymentRecord {
 	if id == "" {
 		ret, _ = s.QueryRepaymentRecordByOrder(s.orders.RepaymentRecordSQLAll)
 	} else {
-		ret, _ = s.QueryRepaymentRecordByOrder(s.orders.AccountsSQLQueryByID + id)
+		ret, _ = s.QueryRepaymentRecordByOrder(s.orders.RepaymentRecordSQLByID + id)
 	}
 	return ret
 }
 func (s *SqlCtr) QueryRepaymentRecordBySQLID(_id_ string) []*types.RawRepaymentRecord {
 	var ret []*types.RawRepaymentRecord
-	ret, _ = s.QueryRepaymentRecordByOrder(s.orders.AccountsSQLQueryBy_ID + _id_)
+	ret, _ = s.QueryRepaymentRecordByOrder(s.orders.RepaymentRecordSQLBy_ID + _id_)
 	return ret
 }
 
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 查询解密发票信息
 func (s *SqlCtr) QueryInvoiceByOrder(order string) ([]string, error) {
 	in_stmt, err := s.db.Prepare(order)
 	if err != nil {
@@ -476,7 +488,6 @@ func (s *SqlCtr) QueryInvoiceByOrder(order string) ([]string, error) {
 			logrus.Errorln("利用对称密钥解密数据失败")
 		}
 		if s.Decrypter.ValidateHash([]byte(record.Hash), data) {
-
 			StrData := string(data) + "," + record.Owner
 			ret = append(ret, StrData)
 		} else {
@@ -486,6 +497,8 @@ func (s *SqlCtr) QueryInvoiceByOrder(order string) ([]string, error) {
 	}
 	return ret, nil
 }
+
+// 查询解密历史交易信息
 func (s *SqlCtr) QueryHistoricalTransByOrder(order string) ([]string, error) {
 	in_stmt, err := s.db.Prepare(order)
 	if err != nil {
@@ -524,6 +537,7 @@ func (s *SqlCtr) QueryHistoricalTransByOrder(order string) ([]string, error) {
 	return ret, nil
 }
 
+// 查询解密入池信息
 func (s *SqlCtr) QueryPoolDataByOrder(order string) ([]string, error) {
 	in_stmt, err := s.db.Prepare(order)
 	if err != nil {
@@ -562,6 +576,7 @@ func (s *SqlCtr) QueryPoolDataByOrder(order string) ([]string, error) {
 	return ret, nil
 }
 
+// 查询解密融资意向申请
 func (s *SqlCtr) QueryFinancingByOrder(order string) ([]string, error) {
 	in_stmt, err := s.db.Prepare(order)
 	if err != nil {
