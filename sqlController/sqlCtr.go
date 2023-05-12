@@ -283,7 +283,7 @@ func (s *SqlCtr) QueryInvoiceInformation(id string) []string {
 	if id == "" {
 		ret, _ = s.QueryInvoiceByOrder(s.orders.InvoiceSQLQueryAll)
 	} else {
-		ret, _ = s.QueryInvoiceByOrder(s.orders.InvoiceSQLQueryByID + id)
+		ret, _ = s.QueryInvoiceByOrder(s.orders.InvoiceSQLQueryByID + id + "%")
 	}
 	return ret
 }

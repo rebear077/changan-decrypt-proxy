@@ -47,7 +47,7 @@ func (front *FrontEnd) DecryptSelectToApplicationInformation(writer http.Respons
 			jsonData := unconsistencyCode()
 			fmt.Fprint(writer, jsonData)
 		} else {
-			targetURL := "https://127.0.0.1:8443/asl/universal/selected-to-application"
+			targetURL := front.url.TargetUrl
 			targetJSON, err := json.Marshal(message)
 			if err != nil {
 				logrus.Errorln(err)
@@ -78,9 +78,9 @@ func (front *FrontEnd) DecryptInvoiceInformation(writer http.ResponseWriter, req
 	slice := Sql.InvoiceInformationIndex(request)
 	fmt.Println(slice)
 	order["id"] = slice.Id
+	order["financeID"] = slice.FinanceID
 	order["invoiceType"] = slice.InvoiceType
 	order["num"] = slice.InvoiceNum
-	fmt.Println("slice.InvoiceNum", slice.InvoiceNum)
 	order["time"] = slice.Time
 	order["pageid"] = slice.PageId
 	currentPage, _ := strconv.Atoi(order["pageid"])
@@ -137,7 +137,6 @@ func (front *FrontEnd) DecryptIntensionInformation(writer http.ResponseWriter, r
 	fmt.Println(slice)
 	order["id"] = slice.Id
 	order["financingId"] = slice.FinanceId
-	fmt.Println("order[financingId]", order["financingId"])
 	order["pageid"] = slice.PageId
 	currentPage, _ := strconv.Atoi(order["pageid"])
 	order["searchType"] = slice.SearchType
@@ -169,7 +168,6 @@ func (front *FrontEnd) DecryptFinancingContractInformation(writer http.ResponseW
 	Sql := sql.NewSqlCtr()
 	slice := Sql.FinancingContractIndex(request)
 	fmt.Println(slice)
-	order["id"] = slice.Id
 	order["pageid"] = slice.PageId
 	currentPage, _ := strconv.Atoi(order["pageid"])
 	order["searchType"] = slice.SearchType
@@ -186,7 +184,6 @@ func (front *FrontEnd) DecryptRepaymentRecordInformation(writer http.ResponseWri
 	Sql := sql.NewSqlCtr()
 	slice := Sql.RepaymentRecordIndex(request)
 	fmt.Println(slice)
-	order["id"] = slice.Id
 	order["pageid"] = slice.PageId
 	currentPage, _ := strconv.Atoi(order["pageid"])
 	order["searchType"] = slice.SearchType

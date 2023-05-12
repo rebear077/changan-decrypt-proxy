@@ -41,20 +41,19 @@ func (s *Server) SearchFinancingContractFromRedis(order map[string]string) ([]*t
 		logrus.Errorln(err)
 		return nil, 0
 	}
-	contracts := s.searchFinancingContractByIDFromRedis(order["id"], order["searchType"])
+	contracts := s.searchFinancingContractByIDFromRedis(order["FinanceId"], order["searchType"])
 	//redis未命中
 	if len(contracts) == 0 {
 		//同步mysql到redis
-		s.DumpFinancingContractFromMysqlToRedis(order["id"])
+		s.DumpFinancingContractFromMysqlToRedis(order["FinanceId"])
 		time.Sleep(500 * time.Millisecond)
 		//二次查询
-		contracts := s.searchFinancingContractByIDFromRedis(order["id"], order["searchType"])
+		contracts := s.searchFinancingContractByIDFromRedis(order["FinanceId"], order["searchType"])
 		if len(contracts) == 0 {
 			return nil, 0
 		}
 	}
-	filterByFinancingID := s.fliterByFinancingID(contracts, order["FinanceId"])
-	filterByPageId := s.filterByFinancingContractPageId(filterByFinancingID, pageid)
+	filterByPageId := s.filterByFinancingContractPageId(contracts, pageid)
 	totalcount := len(filterByPageId)
 	return filterByPageId, totalcount
 }
@@ -84,19 +83,6 @@ func (s *Server) searchFinancingContractByIDFromRedis(id string, order string) [
 	return contracts
 }
 
-// 根据融资请求编号进行过滤，调用此函数前，需要先通过id进行第一次检索
-func (s *Server) fliterByFinancingID(messages []*types.FinancingContract, financeId string) []*types.FinancingContract {
-	if financeId == "" {
-		return messages
-	}
-	result := make([]*types.FinancingContract, 0)
-	for _, message := range messages {
-		if message.FinancingID == financeId {
-			result = append(result, message)
-		}
-	}
-	return result
-}
 func (s *Server) filterByFinancingContractPageId(messages []*types.FinancingContract, financingContractpageid int64) []*types.FinancingContract {
 	start := (financingContractpageid - 1) * 10
 	end := financingContractpageid * 10

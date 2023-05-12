@@ -35,7 +35,7 @@ func unconsistencyCode() string {
 	jsonData := []byte(`{
 		"msg":"",
 		"result": "{}",
-		"code":"unconsistency"
+		"code":"failed"
 	}`)
 	return string(jsonData)
 }

@@ -58,7 +58,6 @@ func (s *Server) SearchIntensionFromRedis(order map[string]string) ([]*types.Fin
 			return nil, 0
 		}
 	}
-	fmt.Println("order[financingId]", order["financingId"])
 	fliterByFinancingId := s.fliterByIntensionID(intensions, order["financingId"])
 	filterByPageId := s.filterByIntensionPageId(fliterByFinancingId, pageid)
 	totalcount := len(fliterByFinancingId)
@@ -77,7 +76,6 @@ func (s *Server) searchIntensionByIDFromRedis(id string, order string) []*types.
 	if len(keys) == 0 {
 		return nil
 	}
-	// if start == -1 || end == -1 {
 	for _, key := range keys {
 		resmap, err := s.redisFinancingIntention.GetAll(ctx, key)
 		if err != nil {
@@ -88,19 +86,6 @@ func (s *Server) searchIntensionByIDFromRedis(id string, order string) []*types.
 		intensions = append(intensions, intension)
 	}
 	return intensions
-	// } else {
-	// 	keys := s.SearchIntensionKeysFromZset(ctx, start, end, order)
-	// 	for _, key := range keys {
-	// 		resmap, err := s.redisFinancingIntention.GetAll(ctx, key)
-	// 		if err != nil {
-	// 			logrus.Errorln(err)
-	// 			continue
-	// 		}
-	// 		intension := packToIntensionStruct(resmap)
-	// 		intensions = append(intensions, intension)
-	// 	}
-	// 	return intensions
-	// }
 }
 
 // 根据融资请求编号进行过滤，调用此函数前，需要先通过id进行第一次检索

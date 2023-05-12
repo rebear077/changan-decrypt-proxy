@@ -38,20 +38,19 @@ func (s *Server) SearchRepaymentRecordFromRedis(order map[string]string) ([]*typ
 		logrus.Errorln(err)
 		return nil, 0
 	}
-	records := s.searchRepaymentRecordByIDFromRedis(order["id"], order["searchType"])
+	records := s.searchRepaymentRecordByIDFromRedis(order["FinanceId"], order["searchType"])
 	//redis未命中
 	if len(records) == 0 {
 		//同步mysql到redis
-		s.DumpRepaymentRecordFromMysqlToRedis(order["id"])
+		s.DumpRepaymentRecordFromMysqlToRedis(order["FinanceId"])
 		time.Sleep(500 * time.Millisecond)
 		//二次查询
-		records := s.searchRepaymentRecordByIDFromRedis(order["id"], order["searchType"])
+		records := s.searchRepaymentRecordByIDFromRedis(order["FinanceId"], order["searchType"])
 		if len(records) == 0 {
 			return nil, 0
 		}
 	}
-	filterByFinancingID := s.fliterByFinanceID(records, order["FinanceId"])
-	filterByPageId := s.filterByRepaymentRecordPageId(filterByFinancingID, pageid)
+	filterByPageId := s.filterByRepaymentRecordPageId(records, pageid)
 	totalcount := len(filterByPageId)
 	return filterByPageId, totalcount
 }
@@ -80,18 +79,7 @@ func (s *Server) searchRepaymentRecordByIDFromRedis(id string, order string) []*
 	}
 	return records
 }
-func (s *Server) fliterByFinanceID(messages []*types.RepaymentRecord, financeId string) []*types.RepaymentRecord {
-	if financeId == "" {
-		return messages
-	}
-	result := make([]*types.RepaymentRecord, 0)
-	for _, message := range messages {
-		if message.FinancingID == financeId {
-			result = append(result, message)
-		}
-	}
-	return result
-}
+
 func (s *Server) filterByRepaymentRecordPageId(messages []*types.RepaymentRecord, repaymentRecordpageid int64) []*types.RepaymentRecord {
 	start := (repaymentRecordpageid - 1) * 10
 	end := repaymentRecordpageid * 10

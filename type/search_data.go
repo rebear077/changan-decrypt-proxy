@@ -4,6 +4,7 @@ type InvoiceInformationSearch struct {
 	Id          string
 	Time        string
 	InvoiceType string
+	FinanceID   string
 	InvoiceNum  string
 	PageId      string
 	SearchType  string
@@ -37,19 +38,16 @@ type CollectionAccountSearch struct {
 	SearchType string
 }
 type FinancingContractSearch struct {
-	Id         string
 	FinanceId  string
 	PageId     string
 	SearchType string
 }
 type RepaymentRecordSearch struct {
 	FinanceId  string
-	Id         string
 	PageId     string
 	SearchType string
 }
 type SelectedInfoToApplication struct {
-	Invoice []InvoiceInformation `json:"invoice"`
-	// HistoryInfo []TransactionHistory `json:"historyInfo"`
-	// PoolInfo    []EnterpoolData      `json:"poolInfo"`
+	FinanceIntention FinancingIntention   `json:"financingIntension"`
+	Invoice          []InvoiceInformation `json:"invoice"`
 }

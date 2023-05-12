@@ -8,6 +8,8 @@ MslProtocol="tcp"
 [Fisco]
 FiscoUrl="http://127.0.0.1:8545"
 
+[Forward]
+TargetUrl="https://127.0.0.1:8443/asl/universal/selected-to-application"
 
 [Redis]
 RedisUrl="127.0.0.1:6379"

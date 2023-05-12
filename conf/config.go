@@ -23,6 +23,8 @@ type Config struct {
 	RedisPassword string
 	//fisco
 	FiscoUrl string
+	//forward
+	TargetUrl string
 	//logDB
 	LogDBUrl      string
 	LogDBUsername string
@@ -151,6 +153,10 @@ func ParseConfig(buffer []byte) ([]Config, error) {
 	}
 	if viper.IsSet("Fisco") {
 		config.FiscoUrl = viper.GetString("Fisco.FiscoUrl")
+
+	}
+	if viper.IsSet("TargetUrl") {
+		config.TargetUrl = viper.GetString("Forward.TargetUrl")
 
 	}
 	if viper.IsSet("Redis") {

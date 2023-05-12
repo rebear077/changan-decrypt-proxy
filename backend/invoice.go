@@ -65,8 +65,8 @@ func (s *Server) SearchInvoiceFromRedis(order map[string]string) ([]*types.Invoi
 		}
 	}
 	filterBytype := s.filterByInvoiceType(invoices, order["invoiceType"])
-	filterByTime := s.filterByInvoiceTimeStamp(filterBytype, order["time"])
-	fmt.Println("order[num]", order["num"])
+	filterByFinanceID := s.filterByFinanceID(filterBytype, order["financeID"])
+	filterByTime := s.filterByInvoiceTimeStamp(filterByFinanceID, order["time"])
 	filterByNum := s.filterByInvoiceNum(filterByTime, order["num"])
 	filterByPageId := s.filterByInvoicePageId(filterByNum, pageid)
 	totalcount := len(filterByNum)
@@ -106,6 +106,18 @@ func (s *Server) filterByInvoiceType(messages []*types.InvoiceInformation, invoc
 	result := make([]*types.InvoiceInformation, 0)
 	for _, message := range messages {
 		if message.Invoicetype == invocietype {
+			result = append(result, message)
+		}
+	}
+	return result
+}
+func (s *Server) filterByFinanceID(messages []*types.InvoiceInformation, financeID string) []*types.InvoiceInformation {
+	if financeID == "" {
+		return messages
+	}
+	result := make([]*types.InvoiceInformation, 0)
+	for _, message := range messages {
+		if message.Owner == financeID {
 			result = append(result, message)
 		}
 	}
