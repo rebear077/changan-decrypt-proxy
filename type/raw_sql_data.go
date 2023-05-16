@@ -162,7 +162,16 @@ type TransactionHistoryHeader struct {
 	Certificateid   string `json:"certificateId"`
 	Customerid      string `json:"customerId"`
 }
-
+type TempTransactionHistoryUsedinfos struct {
+	Customergrade   string
+	Certificatetype string
+	Intercustomerid string
+	Corpname        string
+	Financeid       string
+	Certificateid   string
+	Customerid      string
+	Usedinfos       Usedinfos
+}
 type TransactionHistoryUsedinfos struct {
 	Customergrade   string      `json:"customerGrade"`
 	Certificatetype string      `json:"certificateType"`
@@ -173,7 +182,16 @@ type TransactionHistoryUsedinfos struct {
 	Customerid      string      `json:"customerId"`
 	Usedinfos       []Usedinfos `json:"usedInfos"`
 }
-
+type TempTransactionHistorySettleinfos struct {
+	Customergrade   string
+	Certificatetype string
+	Intercustomerid string
+	Corpname        string
+	Financeid       string
+	Certificateid   string
+	Customerid      string
+	Settleinfos     Settleinfos
+}
 type TransactionHistorySettleinfos struct {
 	Customergrade   string        `json:"customerGrade"`
 	Certificatetype string        `json:"certificateType"`
@@ -184,7 +202,16 @@ type TransactionHistorySettleinfos struct {
 	Customerid      string        `json:"customerId"`
 	Settleinfos     []Settleinfos `json:"settleInfos"`
 }
-
+type TempTransactionHistoryOrderinfos struct {
+	Customergrade   string
+	Certificatetype string
+	Intercustomerid string
+	Corpname        string
+	Financeid       string
+	Certificateid   string
+	Customerid      string
+	Orderinfos      Orderinfos
+}
 type TransactionHistoryOrderinfos struct {
 	Customergrade   string       `json:"customerGrade"`
 	Certificatetype string       `json:"certificateType"`
@@ -195,7 +222,16 @@ type TransactionHistoryOrderinfos struct {
 	Customerid      string       `json:"customerId"`
 	Orderinfos      []Orderinfos `json:"orderInfos"`
 }
-
+type TempTransactionHistoryReceivableinfos struct {
+	Customergrade   string
+	Certificatetype string
+	Intercustomerid string
+	Corpname        string
+	Financeid       string
+	Certificateid   string
+	Customerid      string
+	Receivableinfos Receivableinfos
+}
 type TransactionHistoryReceivableinfos struct {
 	Customergrade   string            `json:"customerGrade"`
 	Certificatetype string            `json:"certificateType"`
@@ -235,7 +271,14 @@ type EnterpoolDataHeader struct {
 	Intercustomerid   string `json:"interCustomerId"`
 	Receivablebalance string `json:"receivableBalance"`
 }
-
+type TempEnterpoolDataPlaninfos struct {
+	Datetimepoint     string
+	Ccy               string
+	Customerid        string
+	Intercustomerid   string
+	Receivablebalance string
+	Planinfos         Planinfos
+}
 type EnterpoolDataPlaninfos struct {
 	Datetimepoint     string      `json:"dateTimePoint"`
 	Ccy               string      `json:"ccy"`
@@ -244,7 +287,14 @@ type EnterpoolDataPlaninfos struct {
 	Receivablebalance string      `json:"receivableBalance"`
 	Planinfos         []Planinfos `json:"planInfos"`
 }
-
+type TempEnterpoolDataProviderusedinfos struct {
+	Datetimepoint     string
+	Ccy               string
+	Customerid        string
+	Intercustomerid   string
+	Receivablebalance string
+	Providerusedinfos Providerusedinfos
+}
 type EnterpoolDataProviderusedinfos struct {
 	Datetimepoint     string              `json:"dateTimePoint"`
 	Ccy               string              `json:"ccy"`

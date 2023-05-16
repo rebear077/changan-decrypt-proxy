@@ -305,17 +305,16 @@ func (s *Server) CannalStoreEnterPoolPlanToredis(datas []*types.RawCanalData) {
 		for _, pland := range txPlan {
 			values := make(map[string]interface{})
 			ctx := context.Background()
-
-			key := pland.Customerid + ":" + pland.Planinfos[0].Tradeyearmonth
+			key := pland.Customerid + ":" + pland.Planinfos.Tradeyearmonth
 			resmap, _ := s.redisEnterPool.GetAll(ctx, key)
 			if len(resmap) == 0 {
 				poolplan := s.SearchEnterPoolBySQLID(string(data.SQLId))
 				s.StoreEnterPoolToRedis(poolplan)
 				continue
 			}
-			values["PlaninfosTradeyearmonth"] = pland.Planinfos[0].Tradeyearmonth
-			values["PlaninfosPlanamount"] = pland.Planinfos[0].Planamount
-			values["PlaninfosCurrency"] = pland.Planinfos[0].Currency
+			values["PlaninfosTradeyearmonth"] = pland.Planinfos.Tradeyearmonth
+			values["PlaninfosPlanamount"] = pland.Planinfos.Planamount
+			values["PlaninfosCurrency"] = pland.Planinfos.Currency
 			fmt.Println(values, "......")
 			s.redisEnterPool.MultipleSet(ctx, key, values)
 		}
@@ -330,17 +329,16 @@ func (s *Server) CannalStoreEnterPoolUsedToredis(datas []*types.RawCanalData) {
 		for _, used := range txUsed {
 			values := make(map[string]interface{})
 			ctx := context.Background()
-			key := used.Customerid + ":" + used.Providerusedinfos[0].Tradeyearmonth
+			key := used.Customerid + ":" + used.Providerusedinfos.Tradeyearmonth
 			resmap, _ := s.redisEnterPool.GetAll(ctx, key)
 			if len(resmap) == 0 {
 				poolused := s.SearchEnterPoolBySQLID(string(data.SQLId))
 				s.StoreEnterPoolToRedis(poolused)
 				continue
 			}
-			values["ProviderusedinfosTradeyearmonth"] = used.Providerusedinfos[0].Tradeyearmonth
-			values["ProviderusedinfosUsedamount"] = used.Providerusedinfos[0].Usedamount
-			values["ProviderusedinfosCurrency"] = used.Providerusedinfos[0].Currency
-			fmt.Println(values, "/////")
+			values["ProviderusedinfosTradeyearmonth"] = used.Providerusedinfos.Tradeyearmonth
+			values["ProviderusedinfosUsedamount"] = used.Providerusedinfos.Usedamount
+			values["ProviderusedinfosCurrency"] = used.Providerusedinfos.Currency
 			err := s.redisEnterPool.MultipleSet(ctx, key, values)
 			if err != nil {
 				logrus.Errorln(err)

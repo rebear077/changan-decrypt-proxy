@@ -192,13 +192,9 @@ func (s *SqlCtr) CollectionAccountIndex(request *http.Request) *types.Collection
 // 借贷合同URL
 func (s *SqlCtr) FinancingContractIndex(request *http.Request) *types.FinancingContractSearch {
 	query := request.URL.Query()
-	id := ""
 	pageid := "1"
 	searchType := "increase"
 	FinanceId := ""
-	if len(query["id"]) > 0 {
-		id = query["id"][0]
-	}
 	if len(query["pageid"]) > 0 {
 		pageid = query["pageid"][0]
 	}
@@ -209,7 +205,6 @@ func (s *SqlCtr) FinancingContractIndex(request *http.Request) *types.FinancingC
 		searchType = query["searchType"][0]
 	}
 	index := types.FinancingContractSearch{
-		Id:         id,
 		PageId:     pageid,
 		SearchType: searchType,
 		FinanceId:  FinanceId,
@@ -220,13 +215,9 @@ func (s *SqlCtr) FinancingContractIndex(request *http.Request) *types.FinancingC
 // 还款信息URL
 func (s *SqlCtr) RepaymentRecordIndex(request *http.Request) *types.RepaymentRecordSearch {
 	query := request.URL.Query()
-	id := ""
 	FinanceId := ""
 	pageid := "1"
 	searchType := "increase"
-	if len(query["id"]) > 0 {
-		id = query["id"][0]
-	}
 	if len(query["id"]) > 0 {
 		FinanceId = query["FinanceId"][0]
 	}
@@ -237,7 +228,6 @@ func (s *SqlCtr) RepaymentRecordIndex(request *http.Request) *types.RepaymentRec
 		searchType = query["searchType"][0]
 	}
 	index := types.RepaymentRecordSearch{
-		Id:         id,
 		PageId:     pageid,
 		SearchType: searchType,
 		FinanceId:  FinanceId,

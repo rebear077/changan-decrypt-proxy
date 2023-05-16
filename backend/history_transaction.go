@@ -18,136 +18,14 @@ import (
 func (s *Server) SearchHistoryTXByID(id string) []*types.TransactionHistory {
 	// 对四个子表的mysql数据库进行检索，将检索的结果以[]string的形式返回，[]string中的每一个元素对应mysql数据表中的每一行数据
 	used_ret := s.sql.QueryHistoricalTransUsedInfos(id)
-	settle_ret := s.sql.QueryHistoricalTransSettleInfos(id)
-	order_ret := s.sql.QueryHistoricalTransOrderInfos(id)
-	receivable_ret := s.sql.QueryHistoricalTransReceivableInfos(id)
-	//记录所有出现过的Customerid与Tradeyearmonth的组合
-	var CustomeridwithTradeyearmonth []string
-	CustomeridwithTradeyearmonthMap := make(map[string]map[string]int)
-	CustomeridwithTradeyearmonthSonMap := make(map[string]int)
-	//属于同一笔交易的四个字表单头部信息相同，hisheader_map用于先记录头部信息
-	//string Customerid+"|"+Tradeyearmonth
-	hisheader_map := make(map[string]types.TransactionHistoryHeader)
-	//处理used子表单
-	//将[]string转换成[]struct形式，结构体数组中的每一个元素对应一个used表单
+	// settle_ret := s.sql.QueryHistoricalTransSettleInfos(id)
+	// order_ret := s.sql.QueryHistoricalTransOrderInfos(id)
+	// receivable_ret := s.sql.QueryHistoricalTransReceivableInfos(id)
 	used_struct := sql.HandleHistoricaltransactionUsedinfos(used_ret)
+	fmt.Println(used_struct)
 	//构造双map，key值：Customerid Tradeyearmonth
-	used_map := make(map[string]map[string]types.TransactionHistoryUsedinfos)
-	used_sonmap := make(map[string]types.TransactionHistoryUsedinfos)
-	for _, usedinfo := range used_struct {
-		//value： 转化成结构体的used表单
-		used_sonmap[usedinfo.Usedinfos[0].Tradeyearmonth] = *usedinfo
-		used_map[usedinfo.Customerid] = used_sonmap
-		if CustomeridwithTradeyearmonthMap[usedinfo.Customerid][usedinfo.Usedinfos[0].Tradeyearmonth] == 0 {
-			//如果该Customerid与Tradeyearmonth的组合还没有出现过，则记录
-			CustomeridwithTradeyearmonth = append(CustomeridwithTradeyearmonth, usedinfo.Customerid+"|"+usedinfo.Usedinfos[0].Tradeyearmonth)
-			CustomeridwithTradeyearmonthSonMap[usedinfo.Usedinfos[0].Tradeyearmonth] = 1
-			CustomeridwithTradeyearmonthMap[usedinfo.Customerid] = CustomeridwithTradeyearmonthSonMap
-			//记录该Customerid与Tradeyearmonth的组合所对应的头部信息
-			var temp types.TransactionHistoryHeader
-			temp.Certificateid = usedinfo.Certificateid
-			temp.Certificatetype = usedinfo.Certificatetype
-			temp.Corpname = usedinfo.Corpname
-			temp.Customergrade = usedinfo.Customergrade
-			temp.Customerid = usedinfo.Customerid
-			temp.Financeid = usedinfo.Financeid
-			temp.Intercustomerid = usedinfo.Intercustomerid
-			hisheader_map[usedinfo.Customerid+"|"+usedinfo.Usedinfos[0].Tradeyearmonth] = temp
-		}
-	}
-	//**********************************************************************************************************
-	//以下三个表单逻辑相同
-	settle_struct := sql.HandleHistoricaltransactionSettleinfos(settle_ret)
-	settle_map := make(map[string]map[string]types.TransactionHistorySettleinfos)
-	settle_sonmap := make(map[string]types.TransactionHistorySettleinfos)
-	for _, settleinfo := range settle_struct {
-		settle_sonmap[settleinfo.Settleinfos[0].Tradeyearmonth] = *settleinfo
-		settle_map[settleinfo.Customerid] = settle_sonmap
-		if CustomeridwithTradeyearmonthMap[settleinfo.Customerid][settleinfo.Settleinfos[0].Tradeyearmonth] == 0 {
-			CustomeridwithTradeyearmonth = append(CustomeridwithTradeyearmonth, settleinfo.Customerid+"|"+settleinfo.Settleinfos[0].Tradeyearmonth)
-			CustomeridwithTradeyearmonthSonMap[settleinfo.Settleinfos[0].Tradeyearmonth] = 1
-			CustomeridwithTradeyearmonthMap[settleinfo.Customerid] = CustomeridwithTradeyearmonthSonMap
-			var temp types.TransactionHistoryHeader
-			temp.Certificateid = settleinfo.Certificateid
-			temp.Certificatetype = settleinfo.Certificatetype
-			temp.Corpname = settleinfo.Corpname
-			temp.Customergrade = settleinfo.Customergrade
-			temp.Customerid = settleinfo.Customerid
-			temp.Financeid = settleinfo.Financeid
-			temp.Intercustomerid = settleinfo.Intercustomerid
-			hisheader_map[settleinfo.Customerid+"|"+settleinfo.Settleinfos[0].Tradeyearmonth] = temp
-		}
-	}
-	// *****************************************************************************************************************8
-	order_struct := sql.HandleHistoricaltransactionOrderinfos(order_ret)
-	order_map := make(map[string]map[string]types.TransactionHistoryOrderinfos)
-	order_sonmap := make(map[string]types.TransactionHistoryOrderinfos)
-	for _, orderinfo := range order_struct {
-		order_sonmap[orderinfo.Orderinfos[0].Tradeyearmonth] = *orderinfo
-		order_map[orderinfo.Customerid] = order_sonmap
-		if CustomeridwithTradeyearmonthMap[orderinfo.Customerid][orderinfo.Orderinfos[0].Tradeyearmonth] == 0 {
-			CustomeridwithTradeyearmonth = append(CustomeridwithTradeyearmonth, orderinfo.Customerid+"|"+orderinfo.Orderinfos[0].Tradeyearmonth)
-			CustomeridwithTradeyearmonthSonMap[orderinfo.Orderinfos[0].Tradeyearmonth] = 1
-			CustomeridwithTradeyearmonthMap[orderinfo.Customerid] = CustomeridwithTradeyearmonthSonMap
 
-			var temp types.TransactionHistoryHeader
-			temp.Certificateid = orderinfo.Certificateid
-			temp.Certificatetype = orderinfo.Certificatetype
-			temp.Corpname = orderinfo.Corpname
-			temp.Customergrade = orderinfo.Customergrade
-			temp.Customerid = orderinfo.Customerid
-			temp.Financeid = orderinfo.Financeid
-			temp.Intercustomerid = orderinfo.Intercustomerid
-			hisheader_map[orderinfo.Customerid+"|"+orderinfo.Orderinfos[0].Tradeyearmonth] = temp
-		}
-	}
-	// *************************************************************************************************************
-	receivable_struct := sql.HandleHistoricaltransactionReceivableinfos(receivable_ret)
-	receivable_map := make(map[string]map[string]types.TransactionHistoryReceivableinfos)
-	receivable_sonmap := make(map[string]types.TransactionHistoryReceivableinfos)
-	for _, receivableinfo := range receivable_struct {
-		receivable_sonmap[receivableinfo.Receivableinfos[0].Tradeyearmonth] = *receivableinfo
-		receivable_map[receivableinfo.Customerid] = receivable_sonmap
-		if CustomeridwithTradeyearmonthMap[receivableinfo.Customerid][receivableinfo.Receivableinfos[0].Tradeyearmonth] == 0 {
-			CustomeridwithTradeyearmonth = append(CustomeridwithTradeyearmonth, receivableinfo.Customerid+"|"+receivableinfo.Receivableinfos[0].Tradeyearmonth)
-			CustomeridwithTradeyearmonthSonMap[receivableinfo.Receivableinfos[0].Tradeyearmonth] = 1
-			CustomeridwithTradeyearmonthMap[receivableinfo.Customerid] = CustomeridwithTradeyearmonthSonMap
-
-			var temp types.TransactionHistoryHeader
-			temp.Certificateid = receivableinfo.Certificateid
-			temp.Certificatetype = receivableinfo.Certificatetype
-			temp.Corpname = receivableinfo.Corpname
-			temp.Customergrade = receivableinfo.Customergrade
-			temp.Customerid = receivableinfo.Customerid
-			temp.Financeid = receivableinfo.Financeid
-			temp.Intercustomerid = receivableinfo.Intercustomerid
-			hisheader_map[receivableinfo.Customerid+"|"+receivableinfo.Receivableinfos[0].Tradeyearmonth] = temp
-		}
-	}
-	// ********************************************************************************************************************
-	// 拼接成TransactionHistory类型
-	var ans []*types.TransactionHistory
-	for _, v := range CustomeridwithTradeyearmonth {
-		// var t *types.TransactionHistory
-		fields := strings.Split(v, "|")
-		customerid := fields[0]
-		tradeyearmonth := fields[1]
-		t := types.TransactionHistory{
-			Customergrade:   hisheader_map[v].Customergrade,
-			Certificatetype: hisheader_map[v].Certificatetype,
-			Intercustomerid: hisheader_map[v].Intercustomerid,
-			Corpname:        hisheader_map[v].Corpname,
-			Financeid:       hisheader_map[v].Financeid,
-			Certificateid:   hisheader_map[v].Certificateid,
-			Customerid:      hisheader_map[v].Customerid,
-			Usedinfos:       used_map[customerid][tradeyearmonth].Usedinfos,
-			Settleinfos:     settle_map[customerid][tradeyearmonth].Settleinfos,
-			Orderinfos:      order_map[customerid][tradeyearmonth].Orderinfos,
-			Receivableinfos: receivable_map[customerid][tradeyearmonth].Receivableinfos,
-		}
-		ans = append(ans, &t)
-	}
-	return ans
+	return nil
 
 }
 func (s *Server) SearchHistoryTXBySQLID(id string) []*types.TransactionHistory {

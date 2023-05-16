@@ -1,42 +1,12 @@
 package sql
 
 import (
+	"fmt"
 	"strings"
 
 	types "github.com/FISCO-BCOS/go-sdk/type"
 	_ "github.com/go-sql-driver/mysql"
 )
-
-// 针对历史交易和入池信息这两个表单，由于包含多个list，需要将header和list的内容分别提取成header和info，header包含多个字段。字段之间通过逗号分割，list形式为[**,**,**|**,**,**]
-func sliceinfohandler(str string) (string, string) {
-	flag := 0
-	header := ""
-	infos := ""
-	for index, val := range str {
-		if index+1 >= len(str) {
-			break
-		}
-		if flag == 0 {
-			if str[index] == ',' && str[index+1] == '[' {
-				flag = 1
-			} else {
-				header = header + string(val)
-			}
-		} else if flag == 1 {
-			//应该是防止有[,]的情况，即子表单中无内容
-			if str[index] == '[' && str[index+1] == ',' {
-				flag = 2
-			} else if str[index] == ']' {
-				flag = 2
-			} else if str[index] != '[' && str[index] != ']' {
-				infos = infos + string(val)
-			}
-		} else if flag == 2 {
-			break
-		}
-	}
-	return header, infos
-}
 
 // 针对发票信息，进入的参数是解密后的明文，转换成结构体
 func HandleInvoiceInfo(data []string) []*types.InvoiceInformation {
@@ -74,215 +44,192 @@ func HandleInvoiceInfo(data []string) []*types.InvoiceInformation {
 
 // 针对历史交易信息的used infos，将解密后的明文转换成结构体
 func HandleHistoricaltransactionUsedinfos(data []string) []*types.TransactionHistoryUsedinfos {
-	var HUI []*types.TransactionHistoryUsedinfos
-	for i := 0; i < len(data); i++ {
-		str := data[i]
-		header, usedinfos := sliceinfohandler(str)
-		header_split := strings.Split(header, ",")
-		var UsedInfos []types.Usedinfos
-		usedinfos_split := strings.Split(usedinfos, "|")
-		if usedinfos_split[0] != "" {
-			for i := 0; i < len(usedinfos_split); i++ {
-				us := strings.Split(usedinfos_split[i], ",")
-				UIfo := types.Usedinfos{
-					Tradeyearmonth: us[0],
-					Usedamount:     us[1],
-					Ccy:            us[2],
-				}
-				UsedInfos = append(UsedInfos, UIfo)
-			}
-		}
-		trui := types.TransactionHistoryUsedinfos{
+	fmt.Println(data, ".....")
+	// var HUI []*types.TransactionHistoryUsedinfos
+	// for i := 0; i < len(data); i++ {
+	// 	str := data[i]
+	// 	header, usedinfos := sliceinfohandler(str)
+	// 	header_split := strings.Split(header, ",")
+	// 	var UsedInfos []types.Usedinfos
+	// 	usedinfos_split := strings.Split(usedinfos, "|")
+	// 	if usedinfos_split[0] != "" {
+	// 		for i := 0; i < len(usedinfos_split); i++ {
+	// 			us := strings.Split(usedinfos_split[i], ",")
+	// 			UIfo := types.Usedinfos{
+	// 				Tradeyearmonth: us[0],
+	// 				Usedamount:     us[1],
+	// 				Ccy:            us[2],
+	// 			}
+	// 			UsedInfos = append(UsedInfos, UIfo)
+	// 		}
+	// 	}
+	// 	trui := types.TransactionHistoryUsedinfos{
 
-			Customergrade:   header_split[0],
-			Certificatetype: header_split[1],
-			Intercustomerid: header_split[2],
-			Corpname:        header_split[3],
-			Financeid:       header_split[4],
-			Certificateid:   header_split[5],
-			Customerid:      header_split[6],
-			Usedinfos:       UsedInfos,
-		}
-		HUI = append(HUI, &trui)
-	}
-	return HUI
+	// 		Customergrade:   header_split[0],
+	// 		Certificatetype: header_split[1],
+	// 		Intercustomerid: header_split[2],
+	// 		Corpname:        header_split[3],
+	// 		Financeid:       header_split[4],
+	// 		Certificateid:   header_split[5],
+	// 		Customerid:      header_split[6],
+	// 		Usedinfos:       UsedInfos,
+	// 	}
+	// 	HUI = append(HUI, &trui)
+	// }
+	return nil
 }
 
 // 针对历史交易信息的 settle infos，将解密后的明文转换成结构体
 func HandleHistoricaltransactionSettleinfos(data []string) []*types.TransactionHistorySettleinfos {
-	var HSI []*types.TransactionHistorySettleinfos
-	for i := 0; i < len(data); i++ {
-		str := data[i]
-		header, settleinfos := sliceinfohandler(str)
-		header_split := strings.Split(header, ",")
-		var SettleInfos []types.Settleinfos
-		settleinfos_split := strings.Split(settleinfos, "|")
-		if settleinfos_split[0] != "" {
-			for i := 0; i < len(settleinfos_split); i++ {
-				st := strings.Split(settleinfos_split[i], ",")
-				SIfo := types.Settleinfos{
-					Tradeyearmonth: st[0],
-					Settleamount:   st[1],
-					Ccy:            st[2],
-				}
-				SettleInfos = append(SettleInfos, SIfo)
-			}
-		}
-		trsi := types.TransactionHistorySettleinfos{
-			Customergrade:   header_split[0],
-			Certificatetype: header_split[1],
-			Intercustomerid: header_split[2],
-			Corpname:        header_split[3],
-			Financeid:       header_split[4],
-			Certificateid:   header_split[5],
-			Customerid:      header_split[6],
-			Settleinfos:     SettleInfos,
-		}
-		HSI = append(HSI, &trsi)
-	}
-	return HSI
+	// var HSI []*types.TransactionHistorySettleinfos
+	// for i := 0; i < len(data); i++ {
+	// 	str := data[i]
+	// 	header, settleinfos := sliceinfohandler(str)
+	// 	header_split := strings.Split(header, ",")
+	// 	var SettleInfos []types.Settleinfos
+	// 	settleinfos_split := strings.Split(settleinfos, "|")
+	// 	if settleinfos_split[0] != "" {
+	// 		for i := 0; i < len(settleinfos_split); i++ {
+	// 			st := strings.Split(settleinfos_split[i], ",")
+	// 			SIfo := types.Settleinfos{
+	// 				Tradeyearmonth: st[0],
+	// 				Settleamount:   st[1],
+	// 				Ccy:            st[2],
+	// 			}
+	// 			SettleInfos = append(SettleInfos, SIfo)
+	// 		}
+	// 	}
+	// 	trsi := types.TransactionHistorySettleinfos{
+	// 		Customergrade:   header_split[0],
+	// 		Certificatetype: header_split[1],
+	// 		Intercustomerid: header_split[2],
+	// 		Corpname:        header_split[3],
+	// 		Financeid:       header_split[4],
+	// 		Certificateid:   header_split[5],
+	// 		Customerid:      header_split[6],
+	// 		Settleinfos:     SettleInfos,
+	// 	}
+	// 	HSI = append(HSI, &trsi)
+	// }
+	return nil
 }
 
 // 针对历史交易信息的 order infos，将解密后的明文转换成结构体
 func HandleHistoricaltransactionOrderinfos(data []string) []*types.TransactionHistoryOrderinfos {
-	var HOI []*types.TransactionHistoryOrderinfos
-	for i := 0; i < len(data); i++ {
-		str := data[i]
-		header, orderinfos := sliceinfohandler(str)
-		header_split := strings.Split(header, ",")
-		var OrderInfos []types.Orderinfos
-		orderinfos_split := strings.Split(orderinfos, "|")
-		if orderinfos_split[0] != "" {
-			for i := 0; i < len(orderinfos_split); i++ {
-				od := strings.Split(orderinfos_split[i], ",")
-				OIfo := types.Orderinfos{
-					Tradeyearmonth: od[0],
-					Orderamount:    od[1],
-					Ccy:            od[2],
-				}
-				OrderInfos = append(OrderInfos, OIfo)
-			}
-		}
-		troi := types.TransactionHistoryOrderinfos{
-			Customergrade:   header_split[0],
-			Certificatetype: header_split[1],
-			Intercustomerid: header_split[2],
-			Corpname:        header_split[3],
-			Financeid:       header_split[4],
-			Certificateid:   header_split[5],
-			Customerid:      header_split[6],
-			Orderinfos:      OrderInfos,
-		}
-		HOI = append(HOI, &troi)
-	}
-	return HOI
+	// var HOI []*types.TransactionHistoryOrderinfos
+	// for i := 0; i < len(data); i++ {
+	// 	str := data[i]
+	// 	header, orderinfos := sliceinfohandler(str)
+	// 	header_split := strings.Split(header, ",")
+	// 	var OrderInfos []types.Orderinfos
+	// 	orderinfos_split := strings.Split(orderinfos, "|")
+	// 	if orderinfos_split[0] != "" {
+	// 		for i := 0; i < len(orderinfos_split); i++ {
+	// 			od := strings.Split(orderinfos_split[i], ",")
+	// 			OIfo := types.Orderinfos{
+	// 				Tradeyearmonth: od[0],
+	// 				Orderamount:    od[1],
+	// 				Ccy:            od[2],
+	// 			}
+	// 			OrderInfos = append(OrderInfos, OIfo)
+	// 		}
+	// 	}
+	// 	troi := types.TransactionHistoryOrderinfos{
+	// 		Customergrade:   header_split[0],
+	// 		Certificatetype: header_split[1],
+	// 		Intercustomerid: header_split[2],
+	// 		Corpname:        header_split[3],
+	// 		Financeid:       header_split[4],
+	// 		Certificateid:   header_split[5],
+	// 		Customerid:      header_split[6],
+	// 		Orderinfos:      OrderInfos,
+	// 	}
+	// 	HOI = append(HOI, &troi)
+	// }
+	return nil
 }
 
 // 针对历史交易信息的 receivable infos，将解密后的明文转换成结构体
 func HandleHistoricaltransactionReceivableinfos(data []string) []*types.TransactionHistoryReceivableinfos {
-	var HRI []*types.TransactionHistoryReceivableinfos
-	for i := 0; i < len(data); i++ {
-		str := data[i]
-		header, receivableinfos := sliceinfohandler(str)
-		header_split := strings.Split(header, ",")
-		var ReceivableInfos []types.Receivableinfos
-		receivableinfos_split := strings.Split(receivableinfos, "|")
-		if receivableinfos_split[0] != "" {
-			for i := 0; i < len(receivableinfos_split); i++ {
-				rc := strings.Split(receivableinfos_split[i], ",")
-				RIfo := types.Receivableinfos{
-					Tradeyearmonth:   rc[0],
-					Receivableamount: rc[1],
-					Ccy:              rc[2],
-				}
-				ReceivableInfos = append(ReceivableInfos, RIfo)
-			}
-		}
-		trri := types.TransactionHistoryReceivableinfos{
-			Customergrade:   header_split[0],
-			Certificatetype: header_split[1],
-			Intercustomerid: header_split[2],
-			Corpname:        header_split[3],
-			Financeid:       header_split[4],
-			Certificateid:   header_split[5],
-			Customerid:      header_split[6],
-			Receivableinfos: ReceivableInfos,
-		}
-		HRI = append(HRI, &trri)
-	}
-	return HRI
+	// var HRI []*types.TransactionHistoryReceivableinfos
+	// for i := 0; i < len(data); i++ {
+	// 	str := data[i]
+	// 	header, receivableinfos := sliceinfohandler(str)
+	// 	header_split := strings.Split(header, ",")
+	// 	var ReceivableInfos []types.Receivableinfos
+	// 	receivableinfos_split := strings.Split(receivableinfos, "|")
+	// 	if receivableinfos_split[0] != "" {
+	// 		for i := 0; i < len(receivableinfos_split); i++ {
+	// 			rc := strings.Split(receivableinfos_split[i], ",")
+	// 			RIfo := types.Receivableinfos{
+	// 				Tradeyearmonth:   rc[0],
+	// 				Receivableamount: rc[1],
+	// 				Ccy:              rc[2],
+	// 			}
+	// 			ReceivableInfos = append(ReceivableInfos, RIfo)
+	// 		}
+	// 	}
+	// 	trri := types.TransactionHistoryReceivableinfos{
+	// 		Customergrade:   header_split[0],
+	// 		Certificatetype: header_split[1],
+	// 		Intercustomerid: header_split[2],
+	// 		Corpname:        header_split[3],
+	// 		Financeid:       header_split[4],
+	// 		Certificateid:   header_split[5],
+	// 		Customerid:      header_split[6],
+	// 		Receivableinfos: ReceivableInfos,
+	// 	}
+	// 	HRI = append(HRI, &trri)
+	// }
+	return nil
 }
 
 // 针对入池信息的 plan infos，将解密后的明文转换成结构体
-func HandleEnterpoolDataPlaninfos(data []string) []*types.EnterpoolDataPlaninfos {
+func HandleEnterpoolDataPlaninfos(data []string) []*types.TempEnterpoolDataPlaninfos {
 	//如果其他输入中存在[]怎么办？
-	//最后返回的结果，目前是结构体的切片
-	var EPD []*types.EnterpoolDataPlaninfos
-	for i := 0; i < len(data); i++ {
-		str := data[i]
 
-		header, planinfos := sliceinfohandler(str)
-
-		header_split := strings.Split(header, ",")
-		var PlanInfos []types.Planinfos
-		planinfos_split := strings.Split(planinfos, "|")
-		if planinfos_split[0] != "" {
-			for i := 0; i < len(planinfos_split); i++ {
-				pl := strings.Split(planinfos_split[i], ",")
-				PLfo := types.Planinfos{
-					Tradeyearmonth: pl[0],
-					Planamount:     pl[1],
-					Currency:       pl[2],
-				}
-				PlanInfos = append(PlanInfos, PLfo)
-			}
+	var EPD []*types.TempEnterpoolDataPlaninfos
+	for _, slice := range data {
+		strs := strings.Split(slice, ",")
+		planinfo := types.Planinfos{
+			Tradeyearmonth: strs[5],
+			Planamount:     strs[6],
+			Currency:       strs[7],
 		}
-
-		epdt := types.EnterpoolDataPlaninfos{
-			Datetimepoint:     header_split[0],
-			Ccy:               header_split[1],
-			Customerid:        header_split[2],
-			Intercustomerid:   header_split[3],
-			Receivablebalance: header_split[4],
-			Planinfos:         PlanInfos,
+		poolPlan := types.TempEnterpoolDataPlaninfos{
+			Datetimepoint:     strs[0],
+			Ccy:               strs[1],
+			Customerid:        strs[2],
+			Intercustomerid:   strs[3],
+			Receivablebalance: strs[4],
+			Planinfos:         planinfo,
 		}
-		EPD = append(EPD, &epdt)
+		EPD = append(EPD, &poolPlan)
 	}
 	return EPD
 }
 
 // 针对入池信息的 provider used infos，将解密后的明文转换成结构体
-func HandleEnterpoolDataProviderusedinfos(data []string) []*types.EnterpoolDataProviderusedinfos {
-	var EPD []*types.EnterpoolDataProviderusedinfos
-	for i := 0; i < len(data); i++ {
-		str := data[i]
-		header, providerusedinfos := sliceinfohandler(str)
-		header_split := strings.Split(header, ",")
-		var ProviderusedInfos []types.Providerusedinfos
-		providerusedinfos_split := strings.Split(providerusedinfos, "|")
-		if providerusedinfos_split[0] != "" {
-			for i := 0; i < len(providerusedinfos_split); i++ {
-				pr := strings.Split(providerusedinfos_split[i], ",")
-				PRfo := types.Providerusedinfos{
-					Tradeyearmonth: pr[0],
-					Usedamount:     pr[1],
-					Currency:       pr[2],
-				}
-				ProviderusedInfos = append(ProviderusedInfos, PRfo)
-			}
+func HandleEnterpoolDataProviderusedinfos(data []string) []*types.TempEnterpoolDataProviderusedinfos {
+	var EDP []*types.TempEnterpoolDataProviderusedinfos
+	for _, slice := range data {
+		strs := strings.Split(slice, ",")
+		usedinfo := types.Providerusedinfos{
+			Tradeyearmonth: strs[5],
+			Usedamount:     strs[6],
+			Currency:       strs[7],
 		}
-
-		epdt := types.EnterpoolDataProviderusedinfos{
-			Datetimepoint:     header_split[0],
-			Ccy:               header_split[1],
-			Customerid:        header_split[2],
-			Intercustomerid:   header_split[3],
-			Receivablebalance: header_split[4],
-			Providerusedinfos: ProviderusedInfos,
+		poolUsed := types.TempEnterpoolDataProviderusedinfos{
+			Datetimepoint:     strs[0],
+			Ccy:               strs[1],
+			Customerid:        strs[2],
+			Intercustomerid:   strs[3],
+			Receivablebalance: strs[4],
+			Providerusedinfos: usedinfo,
 		}
-		EPD = append(EPD, &epdt)
+		EDP = append(EDP, &poolUsed)
 	}
-	return EPD
+	return EDP
 }
 
 // 处理融资意向信息，转换成结构体
@@ -398,90 +345,3 @@ func HandleRepaymentRecord(data []*types.RawRepaymentRecord) []*types.RepaymentR
 	}
 	return records
 }
-
-// 将从数据库解密出来的数据从[]string先转换成结构体数组，然后转换成json
-// func (s *SqlCtr) ConvertoStruct(method string, data []string) string {
-// 	switch method {
-// 	case "HistoricaltransactionUsedinfos":
-// 		result := HandleHistoricaltransactionUsedinfos(data)
-// 		ans, err := json.Marshal(result)
-// 		if err != nil {
-// 			fmt.Println(err)
-// 		}
-// 		// fmt.Println(string(ans))
-// 		return string(ans)
-
-// 	case "HistoricaltransactionSettleinfos":
-// 		result := HandleHistoricaltransactionSettleinfos(data)
-// 		ans, err := json.Marshal(result)
-// 		if err != nil {
-// 			fmt.Println(err)
-// 		}
-// 		// fmt.Println(string(ans))
-// 		return string(ans)
-
-// 	case "HistoricaltransactionOrderinfos":
-// 		result := HandleHistoricaltransactionOrderinfos(data)
-// 		ans, err := json.Marshal(result)
-// 		if err != nil {
-// 			fmt.Println(err)
-// 		}
-// 		// fmt.Println(string(ans))
-// 		return string(ans)
-
-// 	case "HistoricaltransactionReceivableinfos":
-// 		result := HandleHistoricaltransactionReceivableinfos(data)
-// 		ans, err := json.Marshal(result)
-// 		if err != nil {
-// 			fmt.Println(err)
-// 		}
-// 		// fmt.Println(string(ans))
-// 		return string(ans)
-
-// 	case "InvoiceInformation":
-// 		result := HandleInvoiceInfo(data)
-// 		ans, err := json.Marshal(result)
-// 		if err != nil {
-// 			fmt.Println(err)
-// 		}
-// 		fmt.Println(string(ans))
-// 		return string(ans)
-
-// 	case "EnterpoolDataPlaninfos":
-// 		result := HandleEnterpoolDataPlaninfos(data)
-// 		ans, err := json.Marshal(result)
-// 		if err != nil {
-// 			fmt.Println(err)
-// 		}
-// 		// fmt.Println(string(ans))
-// 		return string(ans)
-
-// 	case "EnterpoolDataUsedinfos":
-// 		result := HandleEnterpoolDataProviderusedinfos(data)
-// 		ans, err := json.Marshal(result)
-// 		if err != nil {
-// 			fmt.Println(err)
-// 		}
-// 		// fmt.Println(string(ans))
-// 		return string(ans)
-
-// 	case "FinancingIntention":
-// 		result := HandleFinancingIntention(data)
-// 		ans, err := json.Marshal(result)
-// 		if err != nil {
-// 			fmt.Println(err)
-// 		}
-// 		// fmt.Println(string(ans))
-// 		return string(ans)
-
-// 	case "CollectionAccount":
-// 		result := HandleCollectionAccount(data)
-// 		ans, err := json.Marshal(result)
-// 		if err != nil {
-// 			fmt.Println(err)
-// 		}
-// 		// fmt.Println(string(ans))
-// 		return string(ans)
-// 	}
-// 	return ""
-// }

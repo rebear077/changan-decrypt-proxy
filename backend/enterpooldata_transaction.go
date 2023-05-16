@@ -10,6 +10,7 @@ import (
 
 	"github.com/FISCO-BCOS/go-sdk/redis"
 	sql "github.com/FISCO-BCOS/go-sdk/sqlController"
+	"github.com/FISCO-BCOS/go-sdk/structure"
 	types "github.com/FISCO-BCOS/go-sdk/type"
 	"github.com/sirupsen/logrus"
 )
@@ -18,165 +19,153 @@ func (s *Server) SearchEnterPoolByID(id string) []types.EnterpoolData {
 	//对四个子表的mysql数据库进行检索，将检索的结果以[]string的形式返回，[]string中的每一个元素对应mysql数据表中的每一行数据
 	plan_ret := s.sql.QueryEnterpoolDataPlanInfos(id)
 	used_ret := s.sql.QueryEnterpoolDataUsedInfos(id)
-	//记录所有出现过的Customerid与Tradeyearmonth的组合
-	var CustomeridwithTradeyearmonth []string
-	CustomeridwithTradeyearmonthMap := make(map[string]map[string]int)
-	CustomeridwithTradeyearmonthSonMap := make(map[string]int)
-	//属于同一笔交易的四个字表单头部信息相同，pooldataheader_map用于先记录头部信息
-	//string Customerid+"|"+Tradeyearmonth
-	pooldataheader_map := make(map[string]types.EnterpoolDataHeader)
-	//将[]string转换成[]struct形式，结构体数组中的每一个元素对应一个plan表单
 	plan_struct := sql.HandleEnterpoolDataPlaninfos(plan_ret)
-	//构造双map，key值：Customerid Tradeyearmonth
-	plan_map := make(map[string]map[string]types.EnterpoolDataPlaninfos)
-	plan_sonmap := make(map[string]types.EnterpoolDataPlaninfos)
-	//
-	for _, planinfo := range plan_struct {
-		plan_sonmap[planinfo.Planinfos[0].Tradeyearmonth] = *planinfo
-		plan_map[planinfo.Customerid] = plan_sonmap
-		if CustomeridwithTradeyearmonthMap[planinfo.Customerid][planinfo.Planinfos[0].Tradeyearmonth] == 0 {
-			//如果该Customerid与Tradeyearmonth的组合还没有出现过，则记录
-			CustomeridwithTradeyearmonth = append(CustomeridwithTradeyearmonth, planinfo.Customerid+"|"+planinfo.Planinfos[0].Tradeyearmonth)
-			CustomeridwithTradeyearmonthSonMap[planinfo.Planinfos[0].Tradeyearmonth] = 1
-			CustomeridwithTradeyearmonthMap[planinfo.Customerid] = CustomeridwithTradeyearmonthSonMap
-			//记录该Customerid与Tradeyearmonth的组合所对应的头部信息
-			var temp types.EnterpoolDataHeader
-			temp.Datetimepoint = planinfo.Datetimepoint
-			temp.Ccy = planinfo.Ccy
-			temp.Customerid = planinfo.Customerid
-			temp.Intercustomerid = planinfo.Intercustomerid
-			temp.Receivablebalance = planinfo.Receivablebalance
-			pooldataheader_map[planinfo.Customerid+"|"+planinfo.Planinfos[0].Tradeyearmonth] = temp
-		}
-	}
-	//**********************************************************************************************************
 	used_struct := sql.HandleEnterpoolDataProviderusedinfos(used_ret)
-	used_map := make(map[string]map[string]types.EnterpoolDataProviderusedinfos)
-	used_sonmap := make(map[string]types.EnterpoolDataProviderusedinfos)
-	for _, usedinfo := range used_struct {
-		used_sonmap[usedinfo.Providerusedinfos[0].Tradeyearmonth] = *usedinfo
-		used_map[usedinfo.Customerid] = used_sonmap
-		if CustomeridwithTradeyearmonthMap[usedinfo.Customerid][usedinfo.Providerusedinfos[0].Tradeyearmonth] == 0 {
-			CustomeridwithTradeyearmonth = append(CustomeridwithTradeyearmonth, usedinfo.Customerid+"|"+usedinfo.Providerusedinfos[0].Tradeyearmonth)
-			CustomeridwithTradeyearmonthSonMap[usedinfo.Providerusedinfos[0].Tradeyearmonth] = 1
-			CustomeridwithTradeyearmonthMap[usedinfo.Customerid] = CustomeridwithTradeyearmonthSonMap
-
-			var temp types.EnterpoolDataHeader
-			temp.Datetimepoint = usedinfo.Datetimepoint
-			temp.Ccy = usedinfo.Ccy
-			temp.Customerid = usedinfo.Customerid
-			temp.Intercustomerid = usedinfo.Intercustomerid
-			temp.Receivablebalance = usedinfo.Receivablebalance
-			pooldataheader_map[usedinfo.Customerid+"|"+usedinfo.Providerusedinfos[0].Tradeyearmonth] = temp
+	poolPlanMap := make(map[types.EnterpoolDataHeader][]types.Planinfos)
+	poolUsedMap := make(map[types.EnterpoolDataHeader][]types.Providerusedinfos)
+	headerSet := structure.NewSet()
+	dateSet := structure.NewSet()
+	for _, tempPoolPlan := range plan_struct {
+		header := types.EnterpoolDataHeader{
+			Datetimepoint:     tempPoolPlan.Datetimepoint,
+			Ccy:               tempPoolPlan.Ccy,
+			Customerid:        tempPoolPlan.Customerid,
+			Intercustomerid:   tempPoolPlan.Intercustomerid,
+			Receivablebalance: tempPoolPlan.Receivablebalance,
 		}
+		headerSet.Add(header)
+		poolPlanMap[header] = append(poolPlanMap[header], tempPoolPlan.Planinfos)
+		dateSet.Add(tempPoolPlan.Planinfos.Tradeyearmonth)
+
 	}
+	for _, tempPoolUsed := range used_struct {
+		header := types.EnterpoolDataHeader{
+			Datetimepoint:     tempPoolUsed.Datetimepoint,
+			Ccy:               tempPoolUsed.Ccy,
+			Customerid:        tempPoolUsed.Customerid,
+			Intercustomerid:   tempPoolUsed.Intercustomerid,
+			Receivablebalance: tempPoolUsed.Receivablebalance,
+		}
+		headerSet.Add(header)
+		poolUsedMap[header] = append(poolUsedMap[header], tempPoolUsed.Providerusedinfos)
+		dateSet.Add(tempPoolUsed.Providerusedinfos.Tradeyearmonth)
 
-	//********************************************************************************************************************
-	//拼接成EnterpoolData类型
-	var ans []types.EnterpoolData
-	for _, v := range CustomeridwithTradeyearmonth {
-		var t types.EnterpoolData
-		fields := strings.Split(v, "|")
-		customerid := fields[0]
-		tradeyearmonth := fields[1]
-
-		t.Datetimepoint = pooldataheader_map[v].Datetimepoint
-		t.Ccy = pooldataheader_map[v].Ccy
-		t.Customerid = pooldataheader_map[v].Customerid
-		t.Intercustomerid = pooldataheader_map[v].Intercustomerid
-		t.Receivablebalance = pooldataheader_map[v].Receivablebalance
-
-		t.Planinfos = plan_map[customerid][tradeyearmonth].Planinfos
-		t.Providerusedinfos = used_map[customerid][tradeyearmonth].Providerusedinfos
-
-		ans = append(ans, t)
 	}
-	return ans
+	tempenterPools := make([]types.EnterpoolData, 0)
+	headerList := headerSet.List()
+	dateList := dateSet.List()
+	for _, rawheader := range headerList.([]interface{}) {
+		for _, rawDate := range dateList.([]interface{}) {
+			header := rawheader.(types.EnterpoolDataHeader)
+			date := rawDate.(string)
+			enterPool := types.EnterpoolData{
+				Datetimepoint:     header.Datetimepoint,
+				Ccy:               header.Ccy,
+				Customerid:        header.Customerid,
+				Intercustomerid:   header.Intercustomerid,
+				Receivablebalance: header.Receivablebalance,
+			}
+			if _, ok := poolPlanMap[header]; ok {
+				for _, planinfos := range poolPlanMap[header] {
+					if planinfos.Tradeyearmonth == date {
+						enterPool.Planinfos = append(enterPool.Planinfos, planinfos)
+						break
+					}
+				}
+			}
+			if _, ok := poolUsedMap[header]; ok {
+				for _, usedinfos := range poolUsedMap[header] {
+					if usedinfos.Tradeyearmonth == date {
+						enterPool.Providerusedinfos = append(enterPool.Providerusedinfos, usedinfos)
+						break
+					}
+				}
+			}
+			tempenterPools = append(tempenterPools, enterPool)
+		}
+
+	}
+	fmt.Println(tempenterPools)
+
+	return tempenterPools
 }
 func (s *Server) SearchEnterPoolBySQLID(id string) []types.EnterpoolData {
 	//对四个子表的mysql数据库进行检索，将检索的结果以[]string的形式返回，[]string中的每一个元素对应mysql数据表中的每一行数据
 	plan_ret := s.sql.QueryEnterpoolDataPlanInfosBySQLID(id)
 	used_ret := s.sql.QueryEnterpoolDataUsedInfosBySQLID(id)
-	//记录所有出现过的Customerid与Tradeyearmonth的组合
-	var CustomeridwithTradeyearmonth []string
-	CustomeridwithTradeyearmonthMap := make(map[string]map[string]int)
-	CustomeridwithTradeyearmonthSonMap := make(map[string]int)
-	//属于同一笔交易的四个字表单头部信息相同，pooldataheader_map用于先记录头部信息
-	//string Customerid+"|"+Tradeyearmonth
-	pooldataheader_map := make(map[string]types.EnterpoolDataHeader)
-	//将[]string转换成[]struct形式，结构体数组中的每一个元素对应一个plan表单
 	plan_struct := sql.HandleEnterpoolDataPlaninfos(plan_ret)
-	//构造双map，key值：Customerid Tradeyearmonth
-	plan_map := make(map[string]map[string]types.EnterpoolDataPlaninfos)
-	plan_sonmap := make(map[string]types.EnterpoolDataPlaninfos)
-	//
-	for _, planinfo := range plan_struct {
-		plan_sonmap[planinfo.Planinfos[0].Tradeyearmonth] = *planinfo
-		plan_map[planinfo.Customerid] = plan_sonmap
-		if CustomeridwithTradeyearmonthMap[planinfo.Customerid][planinfo.Planinfos[0].Tradeyearmonth] == 0 {
-			//如果该Customerid与Tradeyearmonth的组合还没有出现过，则记录
-			CustomeridwithTradeyearmonth = append(CustomeridwithTradeyearmonth, planinfo.Customerid+"|"+planinfo.Planinfos[0].Tradeyearmonth)
-			CustomeridwithTradeyearmonthSonMap[planinfo.Planinfos[0].Tradeyearmonth] = 1
-			CustomeridwithTradeyearmonthMap[planinfo.Customerid] = CustomeridwithTradeyearmonthSonMap
-			//记录该Customerid与Tradeyearmonth的组合所对应的头部信息
-			var temp types.EnterpoolDataHeader
-			temp.Datetimepoint = planinfo.Datetimepoint
-			temp.Ccy = planinfo.Ccy
-			temp.Customerid = planinfo.Customerid
-			temp.Intercustomerid = planinfo.Intercustomerid
-			temp.Receivablebalance = planinfo.Receivablebalance
-			pooldataheader_map[planinfo.Customerid+"|"+planinfo.Planinfos[0].Tradeyearmonth] = temp
-		}
-	}
-	//**********************************************************************************************************
 	used_struct := sql.HandleEnterpoolDataProviderusedinfos(used_ret)
-	used_map := make(map[string]map[string]types.EnterpoolDataProviderusedinfos)
-	used_sonmap := make(map[string]types.EnterpoolDataProviderusedinfos)
-	for _, usedinfo := range used_struct {
-		used_sonmap[usedinfo.Providerusedinfos[0].Tradeyearmonth] = *usedinfo
-		used_map[usedinfo.Customerid] = used_sonmap
-		if CustomeridwithTradeyearmonthMap[usedinfo.Customerid][usedinfo.Providerusedinfos[0].Tradeyearmonth] == 0 {
-			CustomeridwithTradeyearmonth = append(CustomeridwithTradeyearmonth, usedinfo.Customerid+"|"+usedinfo.Providerusedinfos[0].Tradeyearmonth)
-			CustomeridwithTradeyearmonthSonMap[usedinfo.Providerusedinfos[0].Tradeyearmonth] = 1
-			CustomeridwithTradeyearmonthMap[usedinfo.Customerid] = CustomeridwithTradeyearmonthSonMap
-
-			var temp types.EnterpoolDataHeader
-			temp.Datetimepoint = usedinfo.Datetimepoint
-			temp.Ccy = usedinfo.Ccy
-			temp.Customerid = usedinfo.Customerid
-			temp.Intercustomerid = usedinfo.Intercustomerid
-			temp.Receivablebalance = usedinfo.Receivablebalance
-			pooldataheader_map[usedinfo.Customerid+"|"+usedinfo.Providerusedinfos[0].Tradeyearmonth] = temp
+	poolPlanMap := make(map[types.EnterpoolDataHeader][]types.Planinfos)
+	poolUsedMap := make(map[types.EnterpoolDataHeader][]types.Providerusedinfos)
+	headerSet := structure.NewSet()
+	dateSet := structure.NewSet()
+	for _, tempPoolPlan := range plan_struct {
+		header := types.EnterpoolDataHeader{
+			Datetimepoint:     tempPoolPlan.Datetimepoint,
+			Ccy:               tempPoolPlan.Ccy,
+			Customerid:        tempPoolPlan.Customerid,
+			Intercustomerid:   tempPoolPlan.Intercustomerid,
+			Receivablebalance: tempPoolPlan.Receivablebalance,
 		}
+		headerSet.Add(header)
+		poolPlanMap[header] = append(poolPlanMap[header], tempPoolPlan.Planinfos)
+		dateSet.Add(tempPoolPlan.Planinfos.Tradeyearmonth)
+
+	}
+	for _, tempPoolUsed := range used_struct {
+		header := types.EnterpoolDataHeader{
+			Datetimepoint:     tempPoolUsed.Datetimepoint,
+			Ccy:               tempPoolUsed.Ccy,
+			Customerid:        tempPoolUsed.Customerid,
+			Intercustomerid:   tempPoolUsed.Intercustomerid,
+			Receivablebalance: tempPoolUsed.Receivablebalance,
+		}
+		headerSet.Add(header)
+		poolUsedMap[header] = append(poolUsedMap[header], tempPoolUsed.Providerusedinfos)
+		dateSet.Add(tempPoolUsed.Providerusedinfos.Tradeyearmonth)
+
+	}
+	tempenterPools := make([]types.EnterpoolData, 0)
+	headerList := headerSet.List()
+	dateList := dateSet.List()
+	for _, rawheader := range headerList.([]interface{}) {
+		for _, rawDate := range dateList.([]interface{}) {
+			header := rawheader.(types.EnterpoolDataHeader)
+			date := rawDate.(string)
+			enterPool := types.EnterpoolData{
+				Datetimepoint:     header.Datetimepoint,
+				Ccy:               header.Ccy,
+				Customerid:        header.Customerid,
+				Intercustomerid:   header.Intercustomerid,
+				Receivablebalance: header.Receivablebalance,
+			}
+			if _, ok := poolPlanMap[header]; ok {
+				for _, planinfos := range poolPlanMap[header] {
+					if planinfos.Tradeyearmonth == date {
+						enterPool.Planinfos = append(enterPool.Planinfos, planinfos)
+						break
+					}
+				}
+			}
+			if _, ok := poolUsedMap[header]; ok {
+				for _, usedinfos := range poolUsedMap[header] {
+					if usedinfos.Tradeyearmonth == date {
+						enterPool.Providerusedinfos = append(enterPool.Providerusedinfos, usedinfos)
+						break
+					}
+				}
+			}
+			tempenterPools = append(tempenterPools, enterPool)
+		}
+
 	}
 
-	//********************************************************************************************************************
-	//拼接成EnterpoolData类型
-	var ans []types.EnterpoolData
-	for _, v := range CustomeridwithTradeyearmonth {
-		var t types.EnterpoolData
-		fields := strings.Split(v, "|")
-		customerid := fields[0]
-		tradeyearmonth := fields[1]
-
-		t.Datetimepoint = pooldataheader_map[v].Datetimepoint
-		t.Ccy = pooldataheader_map[v].Ccy
-		t.Customerid = pooldataheader_map[v].Customerid
-		t.Intercustomerid = pooldataheader_map[v].Intercustomerid
-		t.Receivablebalance = pooldataheader_map[v].Receivablebalance
-
-		t.Planinfos = plan_map[customerid][tradeyearmonth].Planinfos
-		t.Providerusedinfos = used_map[customerid][tradeyearmonth].Providerusedinfos
-
-		ans = append(ans, t)
-	}
-	return ans
+	return tempenterPools
 }
 
 // 存储入池信息到redis数据库中
 func (s *Server) StoreEnterPoolToRedis(data []types.EnterpoolData) {
 	ctx := context.Background()
-
 	for _, enterPool := range data {
 		var key string
 		if enterPool.Planinfos != nil {
@@ -268,7 +257,6 @@ func (s *Server) fliterByEnterPoolTimeStamp(messages []*types.EnterpoolData, txT
 	return result
 
 }
-
 func (s *Server) filterByEnterPoolPageId(messages []*types.EnterpoolData, pageid int64) []*types.EnterpoolData {
 	start := (pageid - 1) * 10
 	end := pageid * 10
@@ -309,19 +297,6 @@ func (s *Server) searchEnterPoolByIDFromRedis(id string, order string) []*types.
 	}
 
 	return enterpool
-	// } else {
-	// 	keys := s.SearchHisTXKeysFromZset(ctx, start, end, order)
-	// 	for _, key := range keys {
-	// 		resmap, err := s.redisEnterPool.GetAll(ctx, key)
-	// 		if err != nil {
-	// 			logrus.Errorln(err)
-	// 			continue
-	// 		}
-	// 		tx := packToEnterPoolStruct(resmap)
-	// 		enterpool = append(enterpool, tx)
-	// 	}
-	// 	return enterpool
-	// }
 }
 
 // 将从redis查询出来的数据转换成结构体
