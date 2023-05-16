@@ -1,7 +1,6 @@
 package sql
 
 import (
-	"fmt"
 	"strings"
 
 	types "github.com/FISCO-BCOS/go-sdk/type"
@@ -43,109 +42,89 @@ func HandleInvoiceInfo(data []string) []*types.InvoiceInformation {
 }
 
 // 针对历史交易信息的used infos，将解密后的明文转换成结构体
-func HandleHistoricaltransactionUsedinfos(data []string) []*types.TransactionHistoryUsedinfos {
-	fmt.Println(data, ".....")
-	// var HUI []*types.TransactionHistoryUsedinfos
-	// for i := 0; i < len(data); i++ {
-	// 	str := data[i]
-	// 	header, usedinfos := sliceinfohandler(str)
-	// 	header_split := strings.Split(header, ",")
-	// 	var UsedInfos []types.Usedinfos
-	// 	usedinfos_split := strings.Split(usedinfos, "|")
-	// 	if usedinfos_split[0] != "" {
-	// 		for i := 0; i < len(usedinfos_split); i++ {
-	// 			us := strings.Split(usedinfos_split[i], ",")
-	// 			UIfo := types.Usedinfos{
-	// 				Tradeyearmonth: us[0],
-	// 				Usedamount:     us[1],
-	// 				Ccy:            us[2],
-	// 			}
-	// 			UsedInfos = append(UsedInfos, UIfo)
-	// 		}
-	// 	}
-	// 	trui := types.TransactionHistoryUsedinfos{
-
-	// 		Customergrade:   header_split[0],
-	// 		Certificatetype: header_split[1],
-	// 		Intercustomerid: header_split[2],
-	// 		Corpname:        header_split[3],
-	// 		Financeid:       header_split[4],
-	// 		Certificateid:   header_split[5],
-	// 		Customerid:      header_split[6],
-	// 		Usedinfos:       UsedInfos,
-	// 	}
-	// 	HUI = append(HUI, &trui)
-	// }
-	return nil
+func HandleHistoricaltransactionUsedinfos(data []string) []*types.TempTransactionHistoryUsedinfos {
+	var HUI []*types.TempTransactionHistoryUsedinfos
+	for i := 0; i < len(data); i++ {
+		str := data[i]
+		usedinfo_split := strings.Split(str, ",")
+		usedInfos := types.Usedinfos{
+			Tradeyearmonth: usedinfo_split[7],
+			Usedamount:     usedinfo_split[8],
+			Ccy:            usedinfo_split[9],
+		}
+		trui := types.TempTransactionHistoryUsedinfos{
+			Customergrade:   usedinfo_split[0],
+			Certificatetype: usedinfo_split[1],
+			Intercustomerid: usedinfo_split[2],
+			Corpname:        usedinfo_split[3],
+			Financeid:       usedinfo_split[4],
+			Certificateid:   usedinfo_split[5],
+			Customerid:      usedinfo_split[6],
+			Usedinfos:       usedInfos,
+		}
+		HUI = append(HUI, &trui)
+	}
+	return HUI
 }
 
 // 针对历史交易信息的 settle infos，将解密后的明文转换成结构体
-func HandleHistoricaltransactionSettleinfos(data []string) []*types.TransactionHistorySettleinfos {
-	// var HSI []*types.TransactionHistorySettleinfos
-	// for i := 0; i < len(data); i++ {
-	// 	str := data[i]
-	// 	header, settleinfos := sliceinfohandler(str)
-	// 	header_split := strings.Split(header, ",")
-	// 	var SettleInfos []types.Settleinfos
-	// 	settleinfos_split := strings.Split(settleinfos, "|")
-	// 	if settleinfos_split[0] != "" {
-	// 		for i := 0; i < len(settleinfos_split); i++ {
-	// 			st := strings.Split(settleinfos_split[i], ",")
-	// 			SIfo := types.Settleinfos{
-	// 				Tradeyearmonth: st[0],
-	// 				Settleamount:   st[1],
-	// 				Ccy:            st[2],
-	// 			}
-	// 			SettleInfos = append(SettleInfos, SIfo)
-	// 		}
-	// 	}
-	// 	trsi := types.TransactionHistorySettleinfos{
-	// 		Customergrade:   header_split[0],
-	// 		Certificatetype: header_split[1],
-	// 		Intercustomerid: header_split[2],
-	// 		Corpname:        header_split[3],
-	// 		Financeid:       header_split[4],
-	// 		Certificateid:   header_split[5],
-	// 		Customerid:      header_split[6],
-	// 		Settleinfos:     SettleInfos,
-	// 	}
-	// 	HSI = append(HSI, &trsi)
-	// }
-	return nil
+func HandleHistoricaltransactionSettleinfos(data []string) []*types.TempTransactionHistorySettleinfos {
+	var HSI []*types.TempTransactionHistorySettleinfos
+	for i := 0; i < len(data); i++ {
+		str := data[i]
+		settle_split := strings.Split(str, ",")
+		settleInfos := types.Settleinfos{
+			Tradeyearmonth: settle_split[7],
+			Settleamount:   settle_split[8],
+			Ccy:            settle_split[9],
+		}
+		trsi := types.TempTransactionHistorySettleinfos{
+			Customergrade:   settle_split[0],
+			Certificatetype: settle_split[1],
+			Intercustomerid: settle_split[2],
+			Corpname:        settle_split[3],
+			Financeid:       settle_split[4],
+			Certificateid:   settle_split[5],
+			Customerid:      settle_split[6],
+			Settleinfos:     settleInfos,
+		}
+		HSI = append(HSI, &trsi)
+	}
+	return HSI
 }
 
 // 针对历史交易信息的 order infos，将解密后的明文转换成结构体
-func HandleHistoricaltransactionOrderinfos(data []string) []*types.TransactionHistoryOrderinfos {
-	// var HOI []*types.TransactionHistoryOrderinfos
-	// for i := 0; i < len(data); i++ {
-	// 	str := data[i]
-	// 	header, orderinfos := sliceinfohandler(str)
-	// 	header_split := strings.Split(header, ",")
-	// 	var OrderInfos []types.Orderinfos
-	// 	orderinfos_split := strings.Split(orderinfos, "|")
-	// 	if orderinfos_split[0] != "" {
-	// 		for i := 0; i < len(orderinfos_split); i++ {
-	// 			od := strings.Split(orderinfos_split[i], ",")
-	// 			OIfo := types.Orderinfos{
-	// 				Tradeyearmonth: od[0],
-	// 				Orderamount:    od[1],
-	// 				Ccy:            od[2],
-	// 			}
-	// 			OrderInfos = append(OrderInfos, OIfo)
-	// 		}
-	// 	}
-	// 	troi := types.TransactionHistoryOrderinfos{
-	// 		Customergrade:   header_split[0],
-	// 		Certificatetype: header_split[1],
-	// 		Intercustomerid: header_split[2],
-	// 		Corpname:        header_split[3],
-	// 		Financeid:       header_split[4],
-	// 		Certificateid:   header_split[5],
-	// 		Customerid:      header_split[6],
-	// 		Orderinfos:      OrderInfos,
-	// 	}
-	// 	HOI = append(HOI, &troi)
-	// }
+func HandleHistoricaltransactionOrderinfos(data []string) []*types.TempTransactionHistoryOrderinfos {
+	var HOI []*types.TransactionHistoryOrderinfos
+	for i := 0; i < len(data); i++ {
+		str := data[i]
+		header, orderinfos := sliceinfohandler(str)
+		header_split := strings.Split(header, ",")
+		var OrderInfos []types.Orderinfos
+		orderinfos_split := strings.Split(orderinfos, "|")
+		if orderinfos_split[0] != "" {
+			for i := 0; i < len(orderinfos_split); i++ {
+				od := strings.Split(orderinfos_split[i], ",")
+				OIfo := types.Orderinfos{
+					Tradeyearmonth: od[0],
+					Orderamount:    od[1],
+					Ccy:            od[2],
+				}
+				OrderInfos = append(OrderInfos, OIfo)
+			}
+		}
+		troi := types.TransactionHistoryOrderinfos{
+			Customergrade:   header_split[0],
+			Certificatetype: header_split[1],
+			Intercustomerid: header_split[2],
+			Corpname:        header_split[3],
+			Financeid:       header_split[4],
+			Certificateid:   header_split[5],
+			Customerid:      header_split[6],
+			Orderinfos:      OrderInfos,
+		}
+		HOI = append(HOI, &troi)
+	}
 	return nil
 }
 

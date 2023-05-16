@@ -81,9 +81,9 @@ FinancingSQLQueryAll   = "select * from u_t_supplier_financing_application2"
 FinancingSQLQueryByID  = "select * from u_t_supplier_financing_application2 where id = "
 FinancingSQLQueryBy_ID = "select * from u_t_supplier_financing_application2 where _id_= "
 #回款账户信息
-AccountsSQLQueryAll   = "select * from u_t_push_payment_accounts"
-AccountsSQLQueryByID  = "select * from u_t_push_payment_accounts where id = "
-AccountsSQLQueryBy_ID = "select * from u_t_push_payment_accounts where _id_= "
+AccountsSQLQueryAll   = "select * from u_t_push_payment_accounts1"
+AccountsSQLQueryByID  = "select * from u_t_push_payment_accounts1 where id = "
+AccountsSQLQueryBy_ID = "select * from u_t_push_payment_accounts1 where _id_= "
 # 借贷合同信息
 FinancingContractSQLAll   = "select * from u_t_finance_contract1"
 FinancingContractSQLByID  = "select * from u_t_finance_contract1 where id="

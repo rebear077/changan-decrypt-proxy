@@ -21,8 +21,8 @@ func (s *Server) SearchHistoryTXByID(id string) []*types.TransactionHistory {
 	// settle_ret := s.sql.QueryHistoricalTransSettleInfos(id)
 	// order_ret := s.sql.QueryHistoricalTransOrderInfos(id)
 	// receivable_ret := s.sql.QueryHistoricalTransReceivableInfos(id)
-	used_struct := sql.HandleHistoricaltransactionUsedinfos(used_ret)
-	fmt.Println(used_struct)
+	// used_struct := sql.HandleHistoricaltransactionUsedinfos(used_ret)
+	sql.HandleHistoricaltransactionUsedinfos(used_ret)
 	//构造双map，key值：Customerid Tradeyearmonth
 
 	return nil
