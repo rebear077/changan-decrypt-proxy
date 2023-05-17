@@ -95,72 +95,55 @@ func HandleHistoricaltransactionSettleinfos(data []string) []*types.TempTransact
 
 // 针对历史交易信息的 order infos，将解密后的明文转换成结构体
 func HandleHistoricaltransactionOrderinfos(data []string) []*types.TempTransactionHistoryOrderinfos {
-	var HOI []*types.TransactionHistoryOrderinfos
+	var HOI []*types.TempTransactionHistoryOrderinfos
 	for i := 0; i < len(data); i++ {
 		str := data[i]
-		header, orderinfos := sliceinfohandler(str)
-		header_split := strings.Split(header, ",")
-		var OrderInfos []types.Orderinfos
-		orderinfos_split := strings.Split(orderinfos, "|")
-		if orderinfos_split[0] != "" {
-			for i := 0; i < len(orderinfos_split); i++ {
-				od := strings.Split(orderinfos_split[i], ",")
-				OIfo := types.Orderinfos{
-					Tradeyearmonth: od[0],
-					Orderamount:    od[1],
-					Ccy:            od[2],
-				}
-				OrderInfos = append(OrderInfos, OIfo)
-			}
+		order_split := strings.Split(str, ",")
+		orderInfos := types.Orderinfos{
+			Tradeyearmonth: order_split[7],
+			Orderamount:    order_split[8],
+			Ccy:            order_split[9],
 		}
-		troi := types.TransactionHistoryOrderinfos{
-			Customergrade:   header_split[0],
-			Certificatetype: header_split[1],
-			Intercustomerid: header_split[2],
-			Corpname:        header_split[3],
-			Financeid:       header_split[4],
-			Certificateid:   header_split[5],
-			Customerid:      header_split[6],
-			Orderinfos:      OrderInfos,
+		troi := types.TempTransactionHistoryOrderinfos{
+			Customergrade:   order_split[0],
+			Certificatetype: order_split[1],
+			Intercustomerid: order_split[2],
+			Corpname:        order_split[3],
+			Financeid:       order_split[4],
+			Certificateid:   order_split[5],
+			Customerid:      order_split[6],
+			Orderinfos:      orderInfos,
 		}
 		HOI = append(HOI, &troi)
 	}
-	return nil
+	return HOI
 }
 
 // 针对历史交易信息的 receivable infos，将解密后的明文转换成结构体
-func HandleHistoricaltransactionReceivableinfos(data []string) []*types.TransactionHistoryReceivableinfos {
-	// var HRI []*types.TransactionHistoryReceivableinfos
-	// for i := 0; i < len(data); i++ {
-	// 	str := data[i]
-	// 	header, receivableinfos := sliceinfohandler(str)
-	// 	header_split := strings.Split(header, ",")
-	// 	var ReceivableInfos []types.Receivableinfos
-	// 	receivableinfos_split := strings.Split(receivableinfos, "|")
-	// 	if receivableinfos_split[0] != "" {
-	// 		for i := 0; i < len(receivableinfos_split); i++ {
-	// 			rc := strings.Split(receivableinfos_split[i], ",")
-	// 			RIfo := types.Receivableinfos{
-	// 				Tradeyearmonth:   rc[0],
-	// 				Receivableamount: rc[1],
-	// 				Ccy:              rc[2],
-	// 			}
-	// 			ReceivableInfos = append(ReceivableInfos, RIfo)
-	// 		}
-	// 	}
-	// 	trri := types.TransactionHistoryReceivableinfos{
-	// 		Customergrade:   header_split[0],
-	// 		Certificatetype: header_split[1],
-	// 		Intercustomerid: header_split[2],
-	// 		Corpname:        header_split[3],
-	// 		Financeid:       header_split[4],
-	// 		Certificateid:   header_split[5],
-	// 		Customerid:      header_split[6],
-	// 		Receivableinfos: ReceivableInfos,
-	// 	}
-	// 	HRI = append(HRI, &trri)
-	// }
-	return nil
+func HandleHistoricaltransactionReceivableinfos(data []string) []*types.TempTransactionHistoryReceivableinfos {
+	var HRI []*types.TempTransactionHistoryReceivableinfos
+	for i := 0; i < len(data); i++ {
+		str := data[i]
+		receivable_split := strings.Split(str, ",")
+		RIfo := types.Receivableinfos{
+			Tradeyearmonth:   receivable_split[7],
+			Receivableamount: receivable_split[8],
+			Ccy:              receivable_split[9],
+		}
+
+		trri := types.TempTransactionHistoryReceivableinfos{
+			Customergrade:   receivable_split[0],
+			Certificatetype: receivable_split[1],
+			Intercustomerid: receivable_split[2],
+			Corpname:        receivable_split[3],
+			Financeid:       receivable_split[4],
+			Certificateid:   receivable_split[5],
+			Customerid:      receivable_split[6],
+			Receivableinfos: RIfo,
+		}
+		HRI = append(HRI, &trri)
+	}
+	return HRI
 }
 
 // 针对入池信息的 plan infos，将解密后的明文转换成结构体

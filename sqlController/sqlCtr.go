@@ -620,7 +620,7 @@ func (s *SqlCtr) QueryAccountsByOrder(order string) ([]string, error) {
 	i := 0
 	for rows.Next() {
 		record := &types.RawAccountsData{}
-		err = rows.Scan(&record.SQLId, &record.Num, &record.Status, &record.ID, &record.Data, &record.Key, &record.Hash)
+		err = rows.Scan(&record.SQLId, &record.Num, &record.Status, &record.ID, &record.FinanceID, &record.Data, &record.Key, &record.Hash, &record.State)
 		if err != nil {
 			logrus.Errorln(err)
 			count++

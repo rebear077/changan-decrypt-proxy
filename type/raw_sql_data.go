@@ -65,13 +65,15 @@ type RawFinancingData struct {
 
 // 数据库中原生回款账户
 type RawAccountsData struct {
-	SQLId  string
-	Num    string
-	Status string
-	ID     string
-	Data   string
-	Key    string
-	Hash   string
+	SQLId     string
+	Num       string
+	Status    string
+	ID        string
+	FinanceID string
+	Data      string
+	Key       string
+	Hash      string
+	State     string
 }
 
 // 数据库中原生借贷合同信息
@@ -108,19 +110,19 @@ type InvoiceInformation struct {
 	Corpname        string `json:"corpName"`
 	Certificatetype string `json:"certificateType"`
 	Intercustomerid string `json:"interCustomerId"`
-	Invoicenotaxamt string `json:"InvoiceNotaxAmt"`
-	Invoiceccy      string `json:"InvoiceCcy"`
-	Sellername      string `json:"SellerName"`
-	Invoicetype     string `json:"InvoiceType"`
-	Buyername       string `json:"BuyerName"`
-	Buyerusccode    string `json:"BuyerUsccode"`
-	Invoicedate     string `json:"InvoiceDate"`
-	Sellerusccode   string `json:"SellerUsccode"`
-	Invoicecode     string `json:"InvoiceCode"`
-	Invoicenum      string `json:"InvoiceNum"`
-	Checkcode       string `json:"CheckCode"`
-	Invoiceamt      string `json:"InvoiceAmt"`
-	Owner           string `json:"Owner"`
+	Invoicenotaxamt string `json:"invoiceNotaxAmt"`
+	Invoiceccy      string `json:"invoiceCcy"`
+	Sellername      string `json:"sellerName"`
+	Invoicetype     string `json:"invoiceType"`
+	Buyername       string `json:"buyerName"`
+	Buyerusccode    string `json:"buyerUsccode"`
+	Invoicedate     string `json:"invoiceDate"`
+	Sellerusccode   string `json:"sellerUsccode"`
+	Invoicecode     string `json:"invoiceCode"`
+	Invoicenum      string `json:"invoiceNum"`
+	Checkcode       string `json:"checkCode"`
+	Invoiceamt      string `json:"invoiceAmt"`
+	Owner           string `json:"owner"`
 }
 
 // 返回给前端的发票信息
@@ -243,24 +245,24 @@ type TransactionHistoryReceivableinfos struct {
 	Receivableinfos []Receivableinfos `json:"receivableInfos"`
 }
 type Usedinfos struct {
-	Tradeyearmonth string `json:"TradeYearMonth"`
-	Usedamount     string `json:"UsedAmount"`
-	Ccy            string `json:"Ccy"`
+	Tradeyearmonth string `json:"tradeYearMonth"`
+	Usedamount     string `json:"usedAmount"`
+	Ccy            string `json:"ccy"`
 }
 type Settleinfos struct {
-	Tradeyearmonth string `json:"TradeYearMonth"`
-	Settleamount   string `json:"SettleAmount"`
-	Ccy            string `json:"Ccy"`
+	Tradeyearmonth string `json:"tradeYearMonth"`
+	Settleamount   string `json:"settleAmount"`
+	Ccy            string `json:"ccy"`
 }
 type Orderinfos struct {
-	Tradeyearmonth string `json:"TradeYearMonth"`
-	Orderamount    string `json:"OrderAmount"`
-	Ccy            string `json:"Ccy"`
+	Tradeyearmonth string `json:"tradeYearMonth"`
+	Orderamount    string `json:"orderAmount"`
+	Ccy            string `json:"ccy"`
 }
 type Receivableinfos struct {
-	Tradeyearmonth   string `json:"TradeYearMonth"`
-	Receivableamount string `json:"ReceivableAmount"`
-	Ccy              string `json:"Ccy"`
+	Tradeyearmonth   string `json:"tradeYearMonth"`
+	Receivableamount string `json:"receivableAmount"`
+	Ccy              string `json:"ccy"`
 }
 
 // 入池信息
@@ -322,32 +324,32 @@ type EnterpoolDataReturn struct {
 }
 
 type Planinfos struct {
-	Tradeyearmonth string `json:"TradeYearMonth"`
-	Planamount     string `json:"PlanAmount"`
-	Currency       string `json:"Currency"`
+	Tradeyearmonth string `json:"tradeYearMonth"`
+	Planamount     string `json:"planAmount"`
+	Currency       string `json:"currency"`
 }
 type Providerusedinfos struct {
-	Tradeyearmonth string `json:"TradeYearMonth"`
-	Usedamount     string `json:"UsedAmount"`
-	Currency       string `json:"Currency"`
+	Tradeyearmonth string `json:"tradeYearMonth"`
+	Usedamount     string `json:"usedAmount"`
+	Currency       string `json:"currency"`
 }
 
 // 提交融资意向接口
 type FinancingIntention struct {
-	Custcdlinkposition string `json:"CustcdLinkPosition"`
-	Custcdlinkname     string `json:"CustcdLinkName"`
-	Certificateid      string `json:"CertificateId"`
-	Corpname           string `json:"CorpName"`
-	Remark             string `json:"Remark"`
-	Bankcontact        string `json:"BankContact"`
-	Banklinkname       string `json:"BankLinkName"`
-	Custcdcontact      string `json:"CustcdContact"`
-	Customerid         string `json:"CustomerId"`
-	Financeid          string `json:"FinanceId"`
-	Cooperationyears   string `json:"CooperationYears"`
-	Certificatetype    string `json:"CertificateType"`
-	Intercustomerid    string `json:"InterCustomerId"`
-	State              string `json:"State"`
+	Custcdlinkposition string `json:"custcdLinkPosition"`
+	Custcdlinkname     string `json:"custcdLinkName"`
+	Certificateid      string `json:"certificateId"`
+	Corpname           string `json:"corpName"`
+	Remark             string `json:"remark"`
+	Bankcontact        string `json:"bankContact"`
+	Banklinkname       string `json:"bankLinkName"`
+	Custcdcontact      string `json:"custcdContact"`
+	Customerid         string `json:"customerId"`
+	Financeid          string `json:"financeId"`
+	Cooperationyears   string `json:"cooperationYears"`
+	Certificatetype    string `json:"certificateType"`
+	Intercustomerid    string `json:"interCustomerId"`
+	State              string `json:"state"`
 }
 
 // 返回给前端的融资意向数据结构
@@ -359,13 +361,13 @@ type FinancingIntentionReturn struct {
 
 // 推送回款账户接口
 type CollectionAccount struct {
-	Backaccount     string `json:"BackAccount"`
-	Certificateid   string `json:"CertificateId"`
-	Customerid      string `json:"CustomerId"`
-	Corpname        string `json:"CorpName"`
-	Lockremark      string `json:"LockRemark"`
-	Certificatetype string `json:"CertificateType"`
-	Intercustomerid string `json:"InterCustomerId"`
+	Backaccount     string `json:"backAccount"`
+	Certificateid   string `json:"certificateId"`
+	Customerid      string `json:"customerId"`
+	Corpname        string `json:"corpName"`
+	Lockremark      string `json:"lockRemark"`
+	Certificatetype string `json:"certificateType"`
+	Intercustomerid string `json:"interCustomerId"`
 }
 
 type CollectionAccountReturn struct {
@@ -384,28 +386,28 @@ type RawInvoiceInformation struct {
 }
 
 type Invoiceinfos struct {
-	Invoicenotaxamt string `json:"InvoiceNotaxAmt"`
-	Invoiceccy      string `json:"InvoiceCcy"`
-	Sellername      string `json:"SellerName"`
-	Invoicetype     string `json:"InvoiceType"`
-	Buyername       string `json:"BuyerName"`
-	Buyerusccode    string `json:"BuyerUsccode"`
-	Invoicedate     string `json:"InvoiceDate"`
-	Sellerusccode   string `json:"SellerUsccode"`
-	Invoicecode     string `json:"InvoiceCode"`
-	Invoicenum      string `json:"InvoiceNum"`
-	Checkcode       string `json:"CheckCode"`
-	Invoiceamt      string `json:"InvoiceAmt"`
+	Invoicenotaxamt string `json:"invoiceNotaxAmt"`
+	Invoiceccy      string `json:"invoiceCcy"`
+	Sellername      string `json:"sellerName"`
+	Invoicetype     string `json:"invoiceType"`
+	Buyername       string `json:"buyerName"`
+	Buyerusccode    string `json:"buyerUsccode"`
+	Invoicedate     string `json:"invoiceDate"`
+	Sellerusccode   string `json:"sellerUsccode"`
+	Invoicecode     string `json:"invoiceCode"`
+	Invoicenum      string `json:"invoiceNum"`
+	Checkcode       string `json:"checkCode"`
+	Invoiceamt      string `json:"invoiceAmt"`
 }
 
 type FinancingContract struct {
-	FinancingID string `json:"FinancingID"`
-	CustomerID  string `json:"CustomerID"`
-	CorpName    string `json:"CorpName"`
-	DebtMoney   string `json:"DebtMoney"`
-	SupplyDate  string `json:"SupplyDate"`
-	ExpireDate  string `json:"ExpireDate"`
-	Balance     string `json:"Balance"`
+	FinancingID string `json:"financingID"`
+	CustomerID  string `json:"customerID"`
+	CorpName    string `json:"corpName"`
+	DebtMoney   string `json:"debtMoney"`
+	SupplyDate  string `json:"supplyDate"`
+	ExpireDate  string `json:"expireDate"`
+	Balance     string `json:"balance"`
 }
 type FinancingContractReturn struct {
 	FinancingContractList []*FinancingContract `json:"financingContractInformationList"`
@@ -413,10 +415,10 @@ type FinancingContractReturn struct {
 	CurrentPage           int                  `json:"currentPage"`
 }
 type RepaymentRecord struct {
-	FinancingID     string `json:"FinancingID"`
-	CustomerID      string `json:"CustomerID"`
-	Time            string `json:"Time"`
-	RepaymentAmount string `json:"RepaymentAmount"`
+	FinancingID     string `json:"financingID"`
+	CustomerID      string `json:"customerID"`
+	Time            string `json:"time"`
+	RepaymentAmount string `json:"repaymentAmount"`
 }
 type RepaymentRecordReturn struct {
 	RepaymentList []*RepaymentRecord `json:"repaymentRecordList"`

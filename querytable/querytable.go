@@ -76,7 +76,6 @@ func (front *FrontEnd) DecryptInvoiceInformation(writer http.ResponseWriter, req
 	order := make(map[string]string)
 	Sql := sql.NewSqlCtr()
 	slice := Sql.InvoiceInformationIndex(request)
-	fmt.Println(slice)
 	order["id"] = slice.Id
 	order["financeID"] = slice.FinanceID
 	order["invoiceType"] = slice.InvoiceType
@@ -85,7 +84,6 @@ func (front *FrontEnd) DecryptInvoiceInformation(writer http.ResponseWriter, req
 	order["pageid"] = slice.PageId
 	currentPage, _ := strconv.Atoi(order["pageid"])
 	order["searchType"] = slice.SearchType
-	fmt.Println(order)
 	invoices, totalcount := front.Server.SearchInvoiceFromRedis(order)
 	jsonData := front.Server.PackToInvoiceJson(invoices, totalcount, currentPage)
 	fmt.Fprint(writer, jsonData)

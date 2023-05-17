@@ -19,6 +19,8 @@ func (s *Server) SearchEnterPoolByID(id string) []types.EnterpoolData {
 	//对四个子表的mysql数据库进行检索，将检索的结果以[]string的形式返回，[]string中的每一个元素对应mysql数据表中的每一行数据
 	plan_ret := s.sql.QueryEnterpoolDataPlanInfos(id)
 	used_ret := s.sql.QueryEnterpoolDataUsedInfos(id)
+	fmt.Println("plan:", plan_ret)
+	fmt.Println("used:", used_ret)
 	plan_struct := sql.HandleEnterpoolDataPlaninfos(plan_ret)
 	used_struct := sql.HandleEnterpoolDataProviderusedinfos(used_ret)
 	poolPlanMap := make(map[types.EnterpoolDataHeader][]types.Planinfos)
@@ -85,7 +87,7 @@ func (s *Server) SearchEnterPoolByID(id string) []types.EnterpoolData {
 		}
 
 	}
-	fmt.Println(tempenterPools)
+	// fmt.Println(tempenterPools)
 
 	return tempenterPools
 }
@@ -276,7 +278,6 @@ func (s *Server) searchEnterPoolByIDFromRedis(id string, order string) []*types.
 	enterpool := make([]*types.EnterpoolData, 0)
 
 	keys := s.GetMutipleEnterPoolKeys(id)
-	fmt.Println(len(keys), "+++++++++++++++++++++++++++")
 	s.redisEnterPool.Del(ctx, "enterpool")
 	s.StoreEnterPoolKeyAndScoreToZset(keys)
 	fmt.Println("enterpool", keys)

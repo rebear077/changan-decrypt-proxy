@@ -18,7 +18,7 @@ func (s *Server) StoreInvoicesToRedis(data []*types.InvoiceInformation) {
 	ctx := context.Background()
 	for _, invoice := range data {
 		values := make(map[string]interface{})
-		key := invoice.Customerid + ":" + invoice.Checkcode
+		key := invoice.Customerid + ":" + invoice.Checkcode + ":" + invoice.Invoicedate
 		fmt.Println(key)
 		values["Certificateid"] = invoice.Certificateid
 		values["Customerid"] = invoice.Customerid
@@ -53,6 +53,7 @@ func (s *Server) SearchInvoiceFromRedis(order map[string]string) ([]*types.Invoi
 		return nil, 0
 	}
 	invoices := s.searchInvoiceByIDFromRedis(order["id"], order["searchType"])
+	fmt.Println(len(invoices))
 	//redis未命中
 	if len(invoices) == 0 {
 		//同步mysql到redis
@@ -64,6 +65,7 @@ func (s *Server) SearchInvoiceFromRedis(order map[string]string) ([]*types.Invoi
 			return nil, 0
 		}
 	}
+	fmt.Println(order)
 	filterBytype := s.filterByInvoiceType(invoices, order["invoiceType"])
 	filterByFinanceID := s.filterByFinanceID(filterBytype, order["financeID"])
 	filterByTime := s.filterByInvoiceTimeStamp(filterByFinanceID, order["time"])
@@ -80,7 +82,6 @@ func (s *Server) searchInvoiceByIDFromRedis(id string, order string) []*types.In
 	keys := s.GetMutipleInvoiceKeys(id)
 	s.redisInvoice.Del(ctx, "invoice")
 	s.StoreInvoiceKeyAndScoreToZset(keys)
-	fmt.Println(keys)
 	//如果redis未命中,返回空的结构体
 	if len(keys) == 0 {
 		return nil

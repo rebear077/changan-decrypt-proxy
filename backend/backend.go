@@ -73,6 +73,7 @@ func (s *Server) ForceSynchronous() {
 	s.StoreHistoryTXToRedis(txs)
 	//同步入池数据信息
 	enterpools := s.SearchEnterPoolByID("")
+	fmt.Println(enterpools)
 	s.StoreEnterPoolToRedis(enterpools)
 	//同步融资意向信息
 	plaintextIntension := s.sql.QueryFinancingIntention("")
@@ -200,7 +201,7 @@ func (s *Server) CannalStoreHisUsedToredis(datas []*types.RawCanalData) {
 		for _, used := range txUsed {
 			values := make(map[string]interface{})
 			ctx := context.Background()
-			key := used.Customerid + ":" + used.Usedinfos[0].Tradeyearmonth
+			key := used.Customerid + ":" + used.Usedinfos.Tradeyearmonth
 			resmap, _ := s.redisHistoryTX.GetAll(ctx, key)
 			fmt.Println(len(resmap))
 			if len(resmap) == 0 {
@@ -208,9 +209,9 @@ func (s *Server) CannalStoreHisUsedToredis(datas []*types.RawCanalData) {
 				s.StoreHistoryTXToRedis(hisTX)
 				continue
 			}
-			values["UsedinfosTradeyearmonth"] = used.Usedinfos[0].Tradeyearmonth
-			values["UsedinfosUsedamount"] = used.Usedinfos[0].Usedamount
-			values["UsedinfosCcy"] = used.Usedinfos[0].Ccy
+			values["UsedinfosTradeyearmonth"] = used.Usedinfos.Tradeyearmonth
+			values["UsedinfosUsedamount"] = used.Usedinfos.Usedamount
+			values["UsedinfosCcy"] = used.Usedinfos.Ccy
 			s.redisHistoryTX.MultipleSet(ctx, key, values)
 		}
 
@@ -224,7 +225,7 @@ func (s *Server) CannalStoreHisSettleToredis(datas []*types.RawCanalData) {
 			fmt.Println(settled, "--------------------")
 			values := make(map[string]interface{})
 			ctx := context.Background()
-			key := settled.Customerid + ":" + settled.Settleinfos[0].Tradeyearmonth
+			key := settled.Customerid + ":" + settled.Settleinfos.Tradeyearmonth
 			resmap, _ := s.redisHistoryTX.GetAll(ctx, key)
 			fmt.Println(len(resmap))
 			if len(resmap) == 0 {
@@ -234,9 +235,9 @@ func (s *Server) CannalStoreHisSettleToredis(datas []*types.RawCanalData) {
 				continue
 			}
 			fmt.Println("resmap not nul")
-			values["SettleinfosTradeyearmonth"] = settled.Settleinfos[0].Tradeyearmonth
-			values["SettleinfosSettleamount"] = settled.Settleinfos[0].Settleamount
-			values["SettleinfosCcy"] = settled.Settleinfos[0].Ccy
+			values["SettleinfosTradeyearmonth"] = settled.Settleinfos.Tradeyearmonth
+			values["SettleinfosSettleamount"] = settled.Settleinfos.Settleamount
+			values["SettleinfosCcy"] = settled.Settleinfos.Ccy
 			s.redisHistoryTX.MultipleSet(ctx, key, values)
 		}
 
@@ -251,7 +252,7 @@ func (s *Server) CannalStoreHisOrderToredis(datas []*types.RawCanalData) {
 			fmt.Println(orderd, "--------------------")
 			values := make(map[string]interface{})
 			ctx := context.Background()
-			key := orderd.Customerid + ":" + orderd.Orderinfos[0].Tradeyearmonth
+			key := orderd.Customerid + ":" + orderd.Orderinfos.Tradeyearmonth
 			resmap, _ := s.redisHistoryTX.GetAll(ctx, key)
 			fmt.Println(resmap)
 			if len(resmap) == 0 {
@@ -261,9 +262,9 @@ func (s *Server) CannalStoreHisOrderToredis(datas []*types.RawCanalData) {
 				continue
 			}
 			fmt.Println("resmap not nul")
-			values["OrderinfosTradeyearmonth"] = orderd.Orderinfos[0].Tradeyearmonth
-			values["OrderinfosOrderamount"] = orderd.Orderinfos[0].Orderamount
-			values["OrderinfosCcy"] = orderd.Orderinfos[0].Ccy
+			values["OrderinfosTradeyearmonth"] = orderd.Orderinfos.Tradeyearmonth
+			values["OrderinfosOrderamount"] = orderd.Orderinfos.Orderamount
+			values["OrderinfosCcy"] = orderd.Orderinfos.Ccy
 
 			s.redisHistoryTX.MultipleSet(ctx, key, values)
 		}
@@ -277,16 +278,16 @@ func (s *Server) CannalStoreHisReceivableToredis(datas []*types.RawCanalData) {
 		for _, receivabled := range txReceivabled {
 			values := make(map[string]interface{})
 			ctx := context.Background()
-			key := receivabled.Customerid + ":" + receivabled.Receivableinfos[0].Tradeyearmonth
+			key := receivabled.Customerid + ":" + receivabled.Receivableinfos.Tradeyearmonth
 			resmap, _ := s.redisHistoryTX.GetAll(ctx, key)
 			if len(resmap) == 0 {
 				hisTX := s.SearchHistoryTXBySQLID(string(data.SQLId))
 				s.StoreHistoryTXToRedis(hisTX)
 				continue
 			}
-			values["ReceivableinfosTradeyearmonth"] = receivabled.Receivableinfos[0].Tradeyearmonth
-			values["ReceivableinfosReceivableamount"] = receivabled.Receivableinfos[0].Receivableamount
-			values["ReceivableinfosCcy"] = receivabled.Receivableinfos[0].Ccy
+			values["ReceivableinfosTradeyearmonth"] = receivabled.Receivableinfos.Tradeyearmonth
+			values["ReceivableinfosReceivableamount"] = receivabled.Receivableinfos.Receivableamount
+			values["ReceivableinfosCcy"] = receivabled.Receivableinfos.Ccy
 			fmt.Println(values)
 			err := s.redisHistoryTX.MultipleSet(ctx, key, values)
 			if err != nil {
