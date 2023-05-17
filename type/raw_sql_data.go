@@ -52,15 +52,16 @@ type RawEnterPoolData struct {
 
 // 数据库中原生的融资意向申请
 type RawFinancingData struct {
-	SQLId     string
-	Num       string
-	Status    string
-	ID        string
-	FinanceId string
-	Data      string
-	Key       string
-	Hash      string
-	State     string
+	SQLId      string
+	Num        string
+	Status     string
+	ID         string
+	FinanceId  string
+	CustomerId string
+	Data       string
+	Key        string
+	Hash       string
+	State      string
 }
 
 // 数据库中原生回款账户
@@ -303,7 +304,7 @@ type EnterpoolDataProviderusedinfos struct {
 	Customerid        string              `json:"customerId"`
 	Intercustomerid   string              `json:"interCustomerId"`
 	Receivablebalance string              `json:"receivableBalance"`
-	Providerusedinfos []Providerusedinfos `json:"ProviderUsedInfos"`
+	Providerusedinfos []Providerusedinfos `json:"providerUsedInfos"`
 }
 
 // 推送入池数据接口
@@ -314,7 +315,7 @@ type EnterpoolData struct {
 	Intercustomerid   string              `json:"interCustomerId"`
 	Receivablebalance string              `json:"receivableBalance"`
 	Planinfos         []Planinfos         `json:"planInfos"`
-	Providerusedinfos []Providerusedinfos `json:"ProviderUsedInfos"`
+	Providerusedinfos []Providerusedinfos `json:"providerUsedInfos"`
 }
 
 type EnterpoolDataReturn struct {
@@ -368,6 +369,8 @@ type CollectionAccount struct {
 	Lockremark      string `json:"lockRemark"`
 	Certificatetype string `json:"certificateType"`
 	Intercustomerid string `json:"interCustomerId"`
+	FinanceId       string `json:"financeId"`
+	State           string `json:"state"`
 }
 
 type CollectionAccountReturn struct {
@@ -401,8 +404,8 @@ type Invoiceinfos struct {
 }
 
 type FinancingContract struct {
-	FinancingID string `json:"financingID"`
-	CustomerID  string `json:"customerID"`
+	FinancingID string `json:"financingId"`
+	CustomerID  string `json:"customerId"`
 	CorpName    string `json:"corpName"`
 	DebtMoney   string `json:"debtMoney"`
 	SupplyDate  string `json:"supplyDate"`

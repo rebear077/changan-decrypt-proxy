@@ -32,6 +32,7 @@ func (s *Server) StoreFinanacingIntensionToRedis(data []*types.FinancingIntentio
 		values["Cooperationyears"] = intension.Cooperationyears
 		values["Certificatetype"] = intension.Certificatetype
 		values["Intercustomerid"] = intension.Intercustomerid
+		values["State"] = intension.State
 		err := s.redisFinancingIntention.MultipleSet(ctx, key, values)
 		if err != nil {
 			logrus.Errorln(err)
@@ -131,6 +132,7 @@ func packToIntensionStruct(message map[string]string) *types.FinancingIntention 
 	intension.Cooperationyears = message["Cooperationyears"]
 	intension.Certificatetype = message["Certificatetype"]
 	intension.Intercustomerid = message["Intercustomerid"]
+	intension.State = message["State"]
 
 	return intension
 

@@ -581,7 +581,7 @@ func (s *SqlCtr) QueryFinancingByOrder(order string) ([]string, error) {
 	i := 0
 	for rows.Next() {
 		record := &types.RawFinancingData{}
-		err = rows.Scan(&record.SQLId, &record.Num, &record.Status, &record.ID, &record.FinanceId, &record.Data, &record.Key, &record.Hash)
+		err = rows.Scan(&record.SQLId, &record.Num, &record.Status, &record.ID, &record.FinanceId, &record.CustomerId, &record.Data, &record.Key, &record.Hash, &record.State)
 		if err != nil {
 			logrus.Errorln(err)
 			count++
@@ -596,11 +596,13 @@ func (s *SqlCtr) QueryFinancingByOrder(order string) ([]string, error) {
 			logrus.Errorln("利用对称密钥解密数据失败")
 		}
 		if s.Decrypter.ValidateHash([]byte(record.Hash), data) {
+			data = []byte(string(data) + "," + record.State)
 			ret = append(ret, string(data))
 		} else {
 			logrus.Errorln("哈希值与数据对应错误")
 		}
 		i = i + 1
+
 	}
 	return ret, nil
 }

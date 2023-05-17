@@ -41,7 +41,7 @@ func (s *Server) SearchFinancingContractFromRedis(order map[string]string) ([]*t
 		logrus.Errorln(err)
 		return nil, 0
 	}
-	contracts := s.searchFinancingContractByIDFromRedis(order["FinanceId"], order["searchType"])
+	contracts := s.searchFinancingContractByIDFromRedis(order["financeId"], order["searchType"])
 	//redis未命中
 	if len(contracts) == 0 {
 		//同步mysql到redis

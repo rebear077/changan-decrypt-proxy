@@ -18,13 +18,12 @@ func (s *Server) StoreRepaymentRecordToRedis(records []*types.RepaymentRecord) {
 	ctx := context.Background()
 	for _, record := range records {
 		values := make(map[string]interface{})
-		key := record.FinancingID
-		fmt.Println(key)
+		key := record.FinancingID + record.Time
 		values["FinancingID"] = record.FinancingID
 		values["CustomerID"] = record.CustomerID
 		values["Time"] = record.Time
 		values["RepaymentAmount"] = record.RepaymentAmount
-		err := s.redisFinancingContract.MultipleSet(ctx, key, values)
+		err := s.redisRepaymentRecord.MultipleSet(ctx, key, values)
 		if err != nil {
 			logrus.Errorln(err)
 		}
@@ -38,14 +37,14 @@ func (s *Server) SearchRepaymentRecordFromRedis(order map[string]string) ([]*typ
 		logrus.Errorln(err)
 		return nil, 0
 	}
-	records := s.searchRepaymentRecordByIDFromRedis(order["FinanceId"], order["searchType"])
+	records := s.searchRepaymentRecordByIDFromRedis(order["financeId"], order["searchType"])
 	//redis未命中
 	if len(records) == 0 {
 		//同步mysql到redis
-		s.DumpRepaymentRecordFromMysqlToRedis(order["FinanceId"])
+		s.DumpRepaymentRecordFromMysqlToRedis(order["financeId"])
 		time.Sleep(500 * time.Millisecond)
 		//二次查询
-		records := s.searchRepaymentRecordByIDFromRedis(order["FinanceId"], order["searchType"])
+		records := s.searchRepaymentRecordByIDFromRedis(order["financeId"], order["searchType"])
 		if len(records) == 0 {
 			return nil, 0
 		}

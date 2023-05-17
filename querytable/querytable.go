@@ -151,6 +151,7 @@ func (front *FrontEnd) DecryptAccountInformation(writer http.ResponseWriter, req
 	slice := Sql.CollectionAccountIndex(request)
 	fmt.Println(slice)
 	order["id"] = slice.Id
+	// order["financeId"]=slice.Id
 	order["pageid"] = slice.PageId
 	currentPage, _ := strconv.Atoi(order["pageid"])
 	order["searchType"] = slice.SearchType
@@ -169,7 +170,7 @@ func (front *FrontEnd) DecryptFinancingContractInformation(writer http.ResponseW
 	order["pageid"] = slice.PageId
 	currentPage, _ := strconv.Atoi(order["pageid"])
 	order["searchType"] = slice.SearchType
-	order["FinanceId"] = slice.FinanceId
+	// order["financeId"] = slice.FinanceId
 	fmt.Println(order)
 	contracts, totalcount := front.Server.SearchFinancingContractFromRedis(order)
 	jsonData := front.Server.PackToFinancingContractJson(contracts, totalcount, currentPage)
@@ -185,7 +186,7 @@ func (front *FrontEnd) DecryptRepaymentRecordInformation(writer http.ResponseWri
 	order["pageid"] = slice.PageId
 	currentPage, _ := strconv.Atoi(order["pageid"])
 	order["searchType"] = slice.SearchType
-	order["FinanceId"] = slice.FinanceId
+	order["financeId"] = slice.FinanceId
 	fmt.Println(order)
 	records, totalcount := front.Server.SearchRepaymentRecordFromRedis(order)
 	jsonData := front.Server.PackToRepaymentRecordJson(records, totalcount, currentPage)
