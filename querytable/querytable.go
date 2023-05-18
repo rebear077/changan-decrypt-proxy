@@ -96,8 +96,8 @@ func (front *FrontEnd) DecryptHistoricaltransaction(writer http.ResponseWriter, 
 	slice := Sql.HistoryTransactionIndex(request)
 	fmt.Println(slice)
 	order["id"] = slice.Id
-	order["Tradeyearmonth"] = slice.Tradeyearmonth
-	order["FinanceId"] = slice.FinanceId
+	order["tradeyearmonth"] = slice.Tradeyearmonth
+	order["financeId"] = slice.FinanceId
 	order["pageid"] = slice.PageId
 	currentPage, _ := strconv.Atoi(order["pageid"])
 	order["searchType"] = slice.SearchType
@@ -116,7 +116,7 @@ func (front *FrontEnd) DecryptEnterPoolData(writer http.ResponseWriter, request 
 	slice := Sql.PoolDataIndex(request)
 	fmt.Println(slice)
 	order["id"] = slice.Id
-	order["Tradeyearmonth"] = slice.Tradeyearmonth
+	order["tradeyearmonth"] = slice.Tradeyearmonth
 	order["pageid"] = slice.PageId
 	currentPage, _ := strconv.Atoi(order["pageid"])
 	order["searchType"] = slice.SearchType
@@ -151,7 +151,7 @@ func (front *FrontEnd) DecryptAccountInformation(writer http.ResponseWriter, req
 	slice := Sql.CollectionAccountIndex(request)
 	fmt.Println(slice)
 	order["id"] = slice.Id
-	// order["financeId"]=slice.Id
+	order["financeId"] = slice.FinanceId
 	order["pageid"] = slice.PageId
 	currentPage, _ := strconv.Atoi(order["pageid"])
 	order["searchType"] = slice.SearchType
@@ -170,7 +170,7 @@ func (front *FrontEnd) DecryptFinancingContractInformation(writer http.ResponseW
 	order["pageid"] = slice.PageId
 	currentPage, _ := strconv.Atoi(order["pageid"])
 	order["searchType"] = slice.SearchType
-	// order["financeId"] = slice.FinanceId
+	order["financeId"] = slice.FinanceId
 	fmt.Println(order)
 	contracts, totalcount := front.Server.SearchFinancingContractFromRedis(order)
 	jsonData := front.Server.PackToFinancingContractJson(contracts, totalcount, currentPage)
@@ -187,6 +187,7 @@ func (front *FrontEnd) DecryptRepaymentRecordInformation(writer http.ResponseWri
 	currentPage, _ := strconv.Atoi(order["pageid"])
 	order["searchType"] = slice.SearchType
 	order["financeId"] = slice.FinanceId
+	order["id"] = slice.Id
 	fmt.Println(order)
 	records, totalcount := front.Server.SearchRepaymentRecordFromRedis(order)
 	jsonData := front.Server.PackToRepaymentRecordJson(records, totalcount, currentPage)

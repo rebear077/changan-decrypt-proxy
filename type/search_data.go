@@ -34,15 +34,18 @@ type FinancingIntentionSearch struct {
 
 type CollectionAccountSearch struct {
 	Id         string
+	FinanceId  string
 	PageId     string
 	SearchType string
 }
 type FinancingContractSearch struct {
+	Id         string
 	FinanceId  string
 	PageId     string
 	SearchType string
 }
 type RepaymentRecordSearch struct {
+	Id         string
 	FinanceId  string
 	PageId     string
 	SearchType string

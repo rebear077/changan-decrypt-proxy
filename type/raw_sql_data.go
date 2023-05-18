@@ -418,8 +418,8 @@ type FinancingContractReturn struct {
 	CurrentPage           int                  `json:"currentPage"`
 }
 type RepaymentRecord struct {
-	FinancingID     string `json:"financingID"`
-	CustomerID      string `json:"customerID"`
+	FinancingID     string `json:"financeId"`
+	CustomerID      string `json:"customerId"`
 	Time            string `json:"time"`
 	RepaymentAmount string `json:"repaymentAmount"`
 }
