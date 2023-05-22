@@ -352,8 +352,8 @@ func (s *Server) SearchHistoryTXFromRedis(order map[string]string) ([]*types.Tra
 	for _, v := range txs {
 		fmt.Println(v)
 	}
-	fliterByTime := s.fliterByHistoryTXTimeStamp(txs, order["Tradeyearmonth"])
-	fliterByFinanceId := s.fliterByHistoryTXFinanceId(fliterByTime, order["FinanceId"])
+	fliterByTime := s.fliterByHistoryTXTimeStamp(txs, order["tradeyearmonth"])
+	fliterByFinanceId := s.fliterByHistoryTXFinanceId(fliterByTime, order["financeId"])
 	filterByPageId := s.filterByHistoryTXPageId(fliterByFinanceId, pageid)
 	totalcount := len(fliterByFinanceId)
 	return filterByPageId, totalcount
@@ -443,19 +443,6 @@ func (s *Server) searchHistoryTXByIDFromRedis(id string, order string) []*types.
 		txs = append(txs, tx)
 	}
 	return txs
-	// } else {
-	// 	keys := s.SearchHisTXKeysFromZset(ctx, start, end, order)
-	// 	for _, key := range keys {
-	// 		resmap, err := s.redisHistoryTX.GetAll(ctx, key)
-	// 		if err != nil {
-	// 			logrus.Errorln(err)
-	// 			continue
-	// 		}
-	// 		tx := packToHistoryTXStruct(resmap)
-	// 		txs = append(txs, tx)
-	// 	}
-	// 	return txs
-	// }
 }
 
 // 将从redis查询出来的数据转换成结构体

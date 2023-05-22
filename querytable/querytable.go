@@ -103,7 +103,6 @@ func (front *FrontEnd) DecryptHistoricaltransaction(writer http.ResponseWriter, 
 	order["searchType"] = slice.SearchType
 	fmt.Println(order)
 	txs, totalcount := front.Server.SearchHistoryTXFromRedis(order)
-	// fmt.Println(txs[0])
 	jsonData := front.Server.PackToHistoryTXJson(txs, totalcount, currentPage)
 	fmt.Fprint(writer, jsonData)
 
@@ -114,13 +113,11 @@ func (front *FrontEnd) DecryptEnterPoolData(writer http.ResponseWriter, request 
 	order := make(map[string]string)
 	Sql := sql.NewSqlCtr()
 	slice := Sql.PoolDataIndex(request)
-	fmt.Println(slice)
 	order["id"] = slice.Id
 	order["tradeyearmonth"] = slice.Tradeyearmonth
 	order["pageid"] = slice.PageId
 	currentPage, _ := strconv.Atoi(order["pageid"])
 	order["searchType"] = slice.SearchType
-	fmt.Println(order)
 	enterpools, totalcount := front.Server.SearchEnterPoolFromRedis(order)
 	// fmt.Println(txs[0])
 	jsonData := front.Server.PackToEnterPoolJson(enterpools, totalcount, currentPage)
@@ -132,7 +129,6 @@ func (front *FrontEnd) DecryptIntensionInformation(writer http.ResponseWriter, r
 	order := make(map[string]string)
 	Sql := sql.NewSqlCtr()
 	slice := Sql.FinancingIntentionIndex(request)
-	fmt.Println(slice)
 	order["id"] = slice.Id
 	order["financingId"] = slice.FinanceId
 	order["pageid"] = slice.PageId
@@ -149,13 +145,11 @@ func (front *FrontEnd) DecryptAccountInformation(writer http.ResponseWriter, req
 	order := make(map[string]string)
 	Sql := sql.NewSqlCtr()
 	slice := Sql.CollectionAccountIndex(request)
-	fmt.Println(slice)
 	order["id"] = slice.Id
 	order["financeId"] = slice.FinanceId
 	order["pageid"] = slice.PageId
 	currentPage, _ := strconv.Atoi(order["pageid"])
 	order["searchType"] = slice.SearchType
-	fmt.Println(order)
 	accounts, totalcount := front.Server.SearchAccountFromRedis(order)
 	jsonData := front.Server.PackToAccountJson(accounts, totalcount, currentPage)
 	fmt.Fprint(writer, jsonData)
@@ -166,12 +160,11 @@ func (front *FrontEnd) DecryptFinancingContractInformation(writer http.ResponseW
 	order := make(map[string]string)
 	Sql := sql.NewSqlCtr()
 	slice := Sql.FinancingContractIndex(request)
-	fmt.Println(slice)
+	order["id"] = slice.Id
 	order["pageid"] = slice.PageId
 	currentPage, _ := strconv.Atoi(order["pageid"])
 	order["searchType"] = slice.SearchType
 	order["financeId"] = slice.FinanceId
-	fmt.Println(order)
 	contracts, totalcount := front.Server.SearchFinancingContractFromRedis(order)
 	jsonData := front.Server.PackToFinancingContractJson(contracts, totalcount, currentPage)
 	fmt.Fprint(writer, jsonData)
@@ -182,7 +175,6 @@ func (front *FrontEnd) DecryptRepaymentRecordInformation(writer http.ResponseWri
 	order := make(map[string]string)
 	Sql := sql.NewSqlCtr()
 	slice := Sql.RepaymentRecordIndex(request)
-	fmt.Println(slice)
 	order["pageid"] = slice.PageId
 	currentPage, _ := strconv.Atoi(order["pageid"])
 	order["searchType"] = slice.SearchType

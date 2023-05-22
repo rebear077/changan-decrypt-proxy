@@ -19,7 +19,6 @@ func (s *Server) StoreInvoicesToRedis(data []*types.InvoiceInformation) {
 	for _, invoice := range data {
 		values := make(map[string]interface{})
 		key := invoice.Customerid + ":" + invoice.Checkcode + ":" + invoice.Invoicedate
-		fmt.Println(key)
 		values["Certificateid"] = invoice.Certificateid
 		values["Customerid"] = invoice.Customerid
 		values["Corpname"] = invoice.Corpname
@@ -87,7 +86,6 @@ func (s *Server) searchInvoiceByIDFromRedis(id string, order string) []*types.In
 		return nil
 	}
 	for _, key := range keys {
-		fmt.Println(key, "-----------------")
 		resmap, err := s.redisInvoice.GetAll(ctx, key)
 		if err != nil {
 			logrus.Errorln("err", err)

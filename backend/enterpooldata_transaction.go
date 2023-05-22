@@ -222,7 +222,7 @@ func (s *Server) SearchEnterPoolFromRedis(order map[string]string) ([]*types.Ent
 			return nil, 0
 		}
 	}
-	fliterByTime := s.fliterByEnterPoolTimeStamp(enterPool, order["Tradeyearmonth"])
+	fliterByTime := s.fliterByEnterPoolTimeStamp(enterPool, order["tradeyearmonth"])
 	filterByPageId := s.filterByEnterPoolPageId(fliterByTime, pageid)
 	totalcount := len(fliterByTime)
 	return filterByPageId, totalcount

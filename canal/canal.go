@@ -71,11 +71,10 @@ func (c *Connector) Start() {
 			log.Println(err)
 			os.Exit(1)
 		}
-		fmt.Println(message)
 		batchId := message.Id
 		if batchId == -1 || len(message.Entries) <= 0 {
-			time.Sleep(3 * time.Second)
-			logrus.Println("===没有数据了===")
+			time.Sleep(10 * time.Second)
+			logrus.Println("===cannal运行中===")
 			continue
 		}
 		c.dealMessage(message.Entries)
@@ -96,68 +95,68 @@ func (c *Connector) dealMessage(entrys []pbe.Entry) {
 		switch header.GetTableName() {
 		case c.tables.InvoiceInfos:
 			for _, rowData := range rowChange.GetRowDatas() {
-				if eventType == pbe.EventType_INSERT {
+				if eventType == pbe.EventType_INSERT || eventType == pbe.EventType_UPDATE {
 					c.dealInsertInvoiceMessage(rowData.GetAfterColumns())
 
 				}
 			}
 		case c.tables.FinanceApplication:
 			for _, rowData := range rowChange.GetRowDatas() {
-				if eventType == pbe.EventType_INSERT {
+				if eventType == pbe.EventType_INSERT || eventType == pbe.EventType_UPDATE {
 					c.dealInsertIntensionMessage(rowData.GetAfterColumns())
 				}
 			}
 		case c.tables.Accounts:
 			for _, rowData := range rowChange.GetRowDatas() {
-				if eventType == pbe.EventType_INSERT {
+				if eventType == pbe.EventType_INSERT || eventType == pbe.EventType_UPDATE {
 					c.dealInsertAccountMessage(rowData.GetAfterColumns())
 				}
 			}
 		case c.tables.HistoricalOrder:
 			for _, rowData := range rowChange.GetRowDatas() {
-				if eventType == pbe.EventType_INSERT {
+				if eventType == pbe.EventType_INSERT || eventType == pbe.EventType_UPDATE {
 					c.dealInsertHistoryOrderMessage(rowData.GetAfterColumns())
 				}
 			}
 		case c.tables.HistoricalReceivable:
 			for _, rowData := range rowChange.GetRowDatas() {
-				if eventType == pbe.EventType_INSERT {
+				if eventType == pbe.EventType_INSERT || eventType == pbe.EventType_UPDATE {
 					c.dealInsertHistoryReceivableMessage(rowData.GetAfterColumns())
 				}
 			}
 		case c.tables.HistoricalSettle:
 			for _, rowData := range rowChange.GetRowDatas() {
-				if eventType == pbe.EventType_INSERT {
+				if eventType == pbe.EventType_INSERT || eventType == pbe.EventType_UPDATE {
 					c.dealInsertHistorySettleMessage(rowData.GetAfterColumns())
 				}
 			}
 		case c.tables.HistoricalUsed:
 			for _, rowData := range rowChange.GetRowDatas() {
-				if eventType == pbe.EventType_INSERT {
+				if eventType == pbe.EventType_INSERT || eventType == pbe.EventType_UPDATE {
 					c.dealInsertHistoryUsedMessage(rowData.GetAfterColumns())
 				}
 			}
 		case c.tables.PoolPlanInfos:
 			for _, rowData := range rowChange.GetRowDatas() {
-				if eventType == pbe.EventType_INSERT {
+				if eventType == pbe.EventType_INSERT || eventType == pbe.EventType_UPDATE {
 					c.dealInsertPoolPlanMessage(rowData.GetAfterColumns())
 				}
 			}
 		case c.tables.PoolUsedInfos:
 			for _, rowData := range rowChange.GetRowDatas() {
-				if eventType == pbe.EventType_INSERT {
+				if eventType == pbe.EventType_INSERT || eventType == pbe.EventType_UPDATE {
 					c.dealInsertPoolUsedMessage(rowData.GetAfterColumns())
 				}
 			}
 		case c.tables.FinanceContract:
 			for _, rowData := range rowChange.GetRowDatas() {
-				if eventType == pbe.EventType_INSERT {
+				if eventType == pbe.EventType_INSERT || eventType == pbe.EventType_UPDATE {
 					c.dealInsertFinancingContractMessage(rowData.GetAfterColumns())
 				}
 			}
 		case c.tables.RepaymentRecord:
 			for _, rowData := range rowChange.GetRowDatas() {
-				if eventType == pbe.EventType_INSERT {
+				if eventType == pbe.EventType_INSERT || eventType == pbe.EventType_UPDATE {
 					c.dealInsertRepaymentRecordtMessage(rowData.GetAfterColumns())
 				}
 			}

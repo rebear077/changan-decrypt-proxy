@@ -45,6 +45,7 @@ func (s *SqlCtr) InvoiceInformationIndex(request *http.Request) *types.InvoiceIn
 	id := ""
 	time := ""
 	invoiceType := ""
+	financeID := ""
 	invoiceNum := ""
 	searchType := "increase"
 	pageid := "1"
@@ -53,6 +54,9 @@ func (s *SqlCtr) InvoiceInformationIndex(request *http.Request) *types.InvoiceIn
 	}
 	if len(query["time"]) > 0 {
 		time = query["time"][0]
+	}
+	if len(query["financeID"]) > 0 {
+		financeID = query["financeID"][0]
 	}
 	if len(query["invoiceType"]) > 0 {
 		invoiceType = query["invoiceType"][0]
@@ -73,6 +77,7 @@ func (s *SqlCtr) InvoiceInformationIndex(request *http.Request) *types.InvoiceIn
 		InvoiceNum:  invoiceNum,
 		PageId:      pageid,
 		SearchType:  searchType,
+		FinanceID:   financeID,
 	}
 	return &index
 }
@@ -91,8 +96,8 @@ func (s *SqlCtr) HistoryTransactionIndex(request *http.Request) *types.HistoryTr
 	if len(query["tradeyearmonth"]) > 0 {
 		tradeyearmonth = query["tradeyearmonth"][0]
 	}
-	if len(query["financeid"]) > 0 {
-		financeid = query["financeid"][0]
+	if len(query["financeId"]) > 0 {
+		financeid = query["financeId"][0]
 	}
 	if len(query["pageid"]) > 0 {
 		pageid = query["pageid"][0]
@@ -148,8 +153,8 @@ func (s *SqlCtr) FinancingIntentionIndex(request *http.Request) *types.Financing
 	if len(query["id"]) > 0 {
 		id = query["id"][0]
 	}
-	if len(query["financeid"]) > 0 {
-		financeid = query["financeid"][0]
+	if len(query["financingId"]) > 0 {
+		financeid = query["financingId"][0]
 	}
 	if len(query["pageid"]) > 0 {
 		pageid = query["pageid"][0]
@@ -194,20 +199,25 @@ func (s *SqlCtr) FinancingContractIndex(request *http.Request) *types.FinancingC
 	query := request.URL.Query()
 	pageid := "1"
 	searchType := "increase"
-	FinanceId := ""
+	financeId := ""
+	id := ""
+	if len(query["id"]) > 0 {
+		id = query["id"][0]
+	}
 	if len(query["pageid"]) > 0 {
 		pageid = query["pageid"][0]
 	}
-	if len(query["FinanceId"]) > 0 {
-		pageid = query["FinanceId"][0]
+	if len(query["financeId"]) > 0 {
+		pageid = query["financeId"][0]
 	}
 	if len(query["searchType"]) > 0 {
 		searchType = query["searchType"][0]
 	}
 	index := types.FinancingContractSearch{
+		Id:         id,
 		PageId:     pageid,
 		SearchType: searchType,
-		FinanceId:  FinanceId,
+		FinanceId:  financeId,
 	}
 	return &index
 }
@@ -218,8 +228,12 @@ func (s *SqlCtr) RepaymentRecordIndex(request *http.Request) *types.RepaymentRec
 	FinanceId := ""
 	pageid := "1"
 	searchType := "increase"
+	id := ""
 	if len(query["id"]) > 0 {
-		FinanceId = query["FinanceId"][0]
+		FinanceId = query["id"][0]
+	}
+	if len(query["financeId"]) > 0 {
+		FinanceId = query["financeId"][0]
 	}
 	if len(query["pageid"]) > 0 {
 		pageid = query["pageid"][0]
@@ -228,6 +242,7 @@ func (s *SqlCtr) RepaymentRecordIndex(request *http.Request) *types.RepaymentRec
 		searchType = query["searchType"][0]
 	}
 	index := types.RepaymentRecordSearch{
+		Id:         id,
 		PageId:     pageid,
 		SearchType: searchType,
 		FinanceId:  FinanceId,

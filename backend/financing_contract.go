@@ -45,10 +45,10 @@ func (s *Server) SearchFinancingContractFromRedis(order map[string]string) ([]*t
 	//redis未命中
 	if len(contracts) == 0 {
 		//同步mysql到redis
-		s.DumpFinancingContractFromMysqlToRedis(order["FinanceId"])
+		s.DumpFinancingContractFromMysqlToRedis(order["financeId"])
 		time.Sleep(500 * time.Millisecond)
 		//二次查询
-		contracts := s.searchFinancingContractByIDFromRedis(order["FinanceId"], order["searchType"])
+		contracts := s.searchFinancingContractByIDFromRedis(order["financeId"], order["searchType"])
 		if len(contracts) == 0 {
 			return nil, 0
 		}

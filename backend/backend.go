@@ -87,7 +87,7 @@ func (s *Server) ForceSynchronous() {
 	plainContracts := s.sql.QueryFinancingContract("")
 	contracts := s.sql.FinancingContractToMap(plainContracts)
 	s.StoreFinancingContractToRedis(contracts)
-	//同步还款信息
+	//同步还款记录信息
 	repayRecord := s.sql.QueryRepaymentRecord("")
 	records := s.sql.RepaymentRecordToMap(repayRecord)
 	s.StoreRepaymentRecordToRedis(records)
