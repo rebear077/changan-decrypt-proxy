@@ -20,58 +20,42 @@ func Decoder(input []byte) (map[string]string, string) {
 	resStrArray := make(map[string]string, 0)
 
 	switch methodID {
-	case "a5daec12":
-		ret, err := ParseIssueResult.UnpackInput("issueAPChannelInfo", common.FromHex(inputStr)[4:]) /////
+	case "784103d2":
+		ret, err := ParseIssueResult.UnpackInput("issueInvoiceInformationStorage", common.FromHex(inputStr)[4:]) /////
 		if err != nil {
 			fmt.Printf("parse return value failed, err: %v\n", err)
 			return nil, "false"
 		}
 		parseRet, ok := ret.([]interface{})
 		if !ok {
-			fmt.Println("issueAPChannelInfo解析错误.......")
+			fmt.Println("issueInvoiceInformationStorage解析错误.......")
 		} else {
-			addr, _ := parseRet[0].(string)
-			issueAPInfo, _ := parseRet[1].(string)
-			fmt.Printf("节点%s 上传APInfo:%s\n", addr, issueAPInfo)
-			resStrArray["addr"] = addr
-			resStrArray["issueAPInfo"] = issueAPInfo
-			return resStrArray, "issueAPChannelInfo"
+			// addr, _ := parseRet[0].(string)
+			issueInvoiceInfo, _ := parseRet[1].(string)
+			// fmt.Printf("节点%s 上传APInfo:%s\n", addr, issueInvoiceInfo)
+			// resStrArray["addr"] = addr
+			resStrArray["issueInvoiceInfo"] = issueInvoiceInfo
+			return resStrArray, "issueInvoiceInformationStorage"
 		}
-	case "b4e2c79b": //
-		ret, err := ParseIssueResult.UnpackInput("updateAPChannelInfo", common.FromHex(inputStr)[4:])
-		if err != nil {
-			fmt.Printf("parse return value failed, err: %v\n", err)
-			return nil, "false"
-		}
-		parseRet, ok := ret.([]interface{})
-		if !ok {
-			fmt.Println("updateAPChannelInfo解析错误.......")
-		} else {
-			addr, _ := parseRet[0].(string)
-			updateAPInfo, _ := parseRet[1].(string)
-			fmt.Printf("节点%s 上传APInfo:%s\n", addr, updateAPInfo)
-			resStrArray["addr"] = addr
-			resStrArray["updateAPInfo"] = updateAPInfo
-			return resStrArray, "updateAPChannelInfo"
-		}
-	case "9a898c74":
-		ret, err := ParseIssueResult.UnpackInput("issueBidingPriceInfo", common.FromHex(inputStr)[4:])
-		if err != nil {
-			fmt.Printf("parse return value failed, err: %v\n", err)
-			return nil, "false"
-		}
-		parseRet, ok := ret.([]interface{})
-		fmt.Println(parseRet)
-		if !ok {
-			fmt.Println("issueBidingPriceInfo解析错误.......")
-		} else {
-			issueBid, _ := parseRet[1].(string)
-			fmt.Println(issueBid)
-			resStrArray["issueBid"] = issueBid
-			return resStrArray, "issueBidingPriceInfo"
-		}
-	case "ebe3efe5":
-		ret, err := ParseIssueResult.UnpackInput("issueChannelSwitchInfo", common.FromHex(inputStr)[4:])
+	// case "b4e2c79b":
+	// 	ret, err := ParseIssueResult.UnpackInput("updateAPChannelInfo", common.FromHex(inputStr)[4:])
+	// 	if err != nil {
+	// 		fmt.Printf("parse return value failed, err: %v\n", err)
+	// 		return nil, "false"
+	// 	}
+	// 	parseRet, ok := ret.([]interface{})
+	// 	if !ok {
+	// 		fmt.Println("updateAPChannelInfo解析错误.......")
+	// 	} else {
+	// 		addr, _ := parseRet[0].(string)
+	// 		updateAPInfo, _ := parseRet[1].(string)
+	// 		fmt.Printf("节点%s 上传APInfo:%s\n", addr, updateAPInfo)
+	// 		resStrArray["addr"] = addr
+	// 		resStrArray["updateAPInfo"] = updateAPInfo
+	// 		return resStrArray, "updateAPChannelInfo"
+	// 	}
+	case "737ad475":
+		ret, err := ParseIssueResult.UnpackInput("issueHistoricalSettleInformation", common.FromHex(inputStr)[4:])
 		if err != nil {
 			fmt.Printf("parse return value failed, err: %v\n", err)
 			return nil, "false"
@@ -79,15 +63,15 @@ func Decoder(input []byte) (map[string]string, string) {
 		parseRet, ok := ret.([]interface{})
 		fmt.Println(parseRet)
 		if !ok {
-			fmt.Println("issueChannelSwitchInfo解析错误.......")
+			fmt.Println("issueHistoricalSettleInformation解析错误.......")
 		} else {
-			issueChSwitch, _ := parseRet[1].(string)
-			fmt.Println(issueChSwitch)
-			resStrArray["issueChSwitch"] = issueChSwitch
-			return resStrArray, "issueChannelSwitchInfo"
+			issueHistoricalSettleInfo, _ := parseRet[1].(string)
+			fmt.Println(issueHistoricalSettleInfo)
+			resStrArray["issueHistoricalSettleInfo"] = issueHistoricalSettleInfo
+			return resStrArray, "issueHistoricalSettleInformation"
 		}
-	case "a351d088":
-		ret, err := ParseIssueResult.UnpackInput("issueChannelDealInfo", common.FromHex(inputStr)[4:])
+	case "05f2a57a":
+		ret, err := ParseIssueResult.UnpackInput("issueHistoricalReceivableInformation", common.FromHex(inputStr)[4:])
 		if err != nil {
 			fmt.Printf("parse return value failed, err: %v\n", err)
 			return nil, "false"
@@ -95,27 +79,76 @@ func Decoder(input []byte) (map[string]string, string) {
 		parseRet, ok := ret.([]interface{})
 		fmt.Println(parseRet)
 		if !ok {
-			fmt.Println("issueChannelDealInfo解析错误.......")
+			fmt.Println("issueHistoricalReceivableInformation解析错误.......")
 		} else {
-			issueChDeal, _ := parseRet[1].(string)
-			fmt.Println(issueChDeal)
-			resStrArray["issueChDeal"] = issueChDeal
-			return resStrArray, "issueChannelDealInfo"
+			issueHistoricalReceivableInfo, _ := parseRet[1].(string)
+			fmt.Println(issueHistoricalReceivableInfo)
+			resStrArray["issueHistoricalReceivableInfo"] = issueHistoricalReceivableInfo
+			return resStrArray, "issueHistoricalReceivableInformation"
 		}
-	case "f2ba888f":
-		ret, err := ParseIssueResult.UnpackInput("queryAPChannelInfo", common.FromHex(inputStr)[4:])
+	case "6e382033":
+		ret, err := ParseIssueResult.UnpackInput("issueHistoricalUsedInformation", common.FromHex(inputStr)[4:])
 		if err != nil {
 			fmt.Printf("parse return value failed, err: %v\n", err)
 			return nil, "false"
 		}
 		parseRet, ok := ret.([]interface{})
+		fmt.Println(parseRet)
 		if !ok {
-			fmt.Println("queryAPChannelInfo解析错误.......")
+			fmt.Println("issueHistoricalUsedInformation解析错误.......")
 		} else {
-			addr, _ := parseRet[0].(string)
-			fmt.Println("节点：", addr, "发起queryAPChannelInfo请求.....")
-			resStrArray["addr"] = addr
-			return resStrArray, "queryAPChannelInfo"
+			issueHistoricalUsedInfo, _ := parseRet[1].(string)
+			fmt.Println(issueHistoricalUsedInfo)
+			resStrArray["issueHistoricalOrderInfo"] = issueHistoricalUsedInfo
+			return resStrArray, " issueHistoricalUsedInformation"
+		}
+	case "66fffcbc":
+		ret, err := ParseIssueResult.UnpackInput("issueHistoricalOrderInformation", common.FromHex(inputStr)[4:])
+		if err != nil {
+			fmt.Printf("parse return value failed, err: %v\n", err)
+			return nil, "false"
+		}
+		parseRet, ok := ret.([]interface{})
+		fmt.Println(parseRet)
+		if !ok {
+			fmt.Println("issueHistoricalOrderInformation解析错误.......")
+		} else {
+			issueHistoricalOrderInfo, _ := parseRet[1].(string)
+			fmt.Println(issueHistoricalOrderInfo)
+			resStrArray["issueHistoricalOrderInfo"] = issueHistoricalOrderInfo
+			return resStrArray, "issueHistoricalOrderInformation"
+		}
+	case "ebf1db00":
+		ret, err := ParseIssueResult.UnpackInput("issuePoolPlanInformation", common.FromHex(inputStr)[4:])
+		if err != nil {
+			fmt.Printf("parse return value failed, err: %v\n", err)
+			return nil, "false"
+		}
+		parseRet, ok := ret.([]interface{})
+		fmt.Println(parseRet)
+		if !ok {
+			fmt.Println("issuePoolPlanInformation解析错误.......")
+		} else {
+			issuePoolPlanInfo, _ := parseRet[1].(string)
+			fmt.Println(issuePoolPlanInfo)
+			resStrArray["issuePoolPlanInfo"] = issuePoolPlanInfo
+			return resStrArray, "issuePoolPlanInformation"
+		}
+	case "89dd75fd":
+		ret, err := ParseIssueResult.UnpackInput("issuePoolUsedInformation", common.FromHex(inputStr)[4:])
+		if err != nil {
+			fmt.Printf("parse return value failed, err: %v\n", err)
+			return nil, "false"
+		}
+		parseRet, ok := ret.([]interface{})
+		fmt.Println(parseRet)
+		if !ok {
+			fmt.Println("issuePoolUsedInformation解析错误.......")
+		} else {
+			issuePoolUsedInfo, _ := parseRet[1].(string)
+			fmt.Println(issuePoolUsedInfo)
+			resStrArray["issuePoolUsedInfo"] = issuePoolUsedInfo
+			return resStrArray, "issuePoolUsedInformation"
 		}
 	}
 	return nil, "false"

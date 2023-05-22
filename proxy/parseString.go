@@ -6,6 +6,58 @@ import (
 	"strings"
 )
 
+func DecodeInvoiceInfotoString(invoiceinfo string, txHash string) InvoiceInfo {
+	// var err error
+	var revData InvoiceInfo = InvoiceInfo{}
+	array := strings.Split(invoiceinfo, ",")
+	revData.Method = array[0]
+	return revData
+}
+
+func DecodeHistoricalSettleInfotoString(HistoricalSettleinfo string, txHash string) HistoricalSettleInfo {
+	// var err error
+	var revData HistoricalSettleInfo = HistoricalSettleInfo{}
+	array := strings.Split(HistoricalSettleinfo, ",")
+	revData.Method = array[0]
+	return revData
+}
+
+func DecodeHistoricalOrderInfotoString(HistoricalOrderinfo string, txHash string) HistoricalOrderInfo {
+	// var err error
+	var revData HistoricalOrderInfo = HistoricalOrderInfo{}
+	array := strings.Split(HistoricalOrderinfo, ",")
+	revData.Method = array[0]
+	return revData
+}
+func DecodeHistoricalUsedInfotoString(HistoricalUsedinfo string, txHash string) HistoricalUsedInfo {
+	// var err error
+	var revData HistoricalUsedInfo = HistoricalUsedInfo{}
+	array := strings.Split(HistoricalUsedinfo, ",")
+	revData.Method = array[0]
+	return revData
+}
+func DecodePoolUsedInfotoString(PoolUsedinfo string, txHash string) PoolUsedInfo {
+	// var err error
+	var revData PoolUsedInfo = PoolUsedInfo{}
+	array := strings.Split(PoolUsedinfo, ",")
+	revData.Method = array[0]
+	return revData
+}
+func DecodePoolPlanInfotoString(PoolPlaninfo string, txHash string) PoolPlanInfo {
+	// var err error
+	var revData PoolPlanInfo = PoolPlanInfo{}
+	array := strings.Split(PoolPlaninfo, ",")
+	revData.Method = array[0]
+	return revData
+}
+func DecodeHistoricalReceivableInfotoString(HistoricalReceivableinfo string, txHash string) HistoricalReceivableInfo {
+	// var err error
+	var revData HistoricalReceivableInfo = HistoricalReceivableInfo{}
+	array := strings.Split(HistoricalReceivableinfo, ",")
+	revData.Method = array[0]
+	return revData
+}
+
 // 解析update/issueAPInfo字符串
 func DecodeAPtoString(apChInfo string, txHash string) APChannelInfo {
 	var err error

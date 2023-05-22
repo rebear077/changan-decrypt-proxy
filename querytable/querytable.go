@@ -467,39 +467,43 @@ func (front *FrontEnd) ParesTXInfo(w http.ResponseWriter, r *http.Request) {
 			fmt.Printf("这是第%d笔交易的输入input:%v\n", index, tx.Input)
 			resStrArray, msgType := proxy.Decoder([]byte(tx.Input))
 			switch msgType {
-			case "issueAPChannelInfo":
-				apInfo := proxy.DecodeAPtoString(resStrArray["issueAPInfo"], tx.Hash)
-				apInfo.Method = "Update APInfo FromDB"
-				txList.Transactions = append(txList.Transactions, apInfo)
+			case "issueInvoiceInformationStorage":
+				invoiceInfo := proxy.DecodeInvoiceInfotoString(resStrArray["issueInvoiceInfo"], tx.Hash)
+				// apInfo.Method = "Issue Invoice Information"
+				txList.Transactions = append(txList.Transactions, invoiceInfo)
 
-			case "updateAPChannelInfo":
-				apInfo := proxy.DecodeAPtoString(resStrArray["updateAPInfo"], tx.Hash)
-				apInfo.Method = "Update APInfo FromDB"
-				txList.Transactions = append(txList.Transactions, apInfo)
+			case "issueHistoricalSettleInformation":
+				historicalsettleInfo := proxy.DecodeHistoricalSettleInfotoString(resStrArray["issueHistoricalSettleInfo"], tx.Hash)
+				// apInfo.Method = "Issue HistoricalSettle Information"
+				txList.Transactions = append(txList.Transactions, historicalsettleInfo)
 
-			case "issueBidingPriceInfo":
-				bidPrice := proxy.DecodeBPtoString(resStrArray["issueBid"], tx.Hash)
-				bidPrice.Method = "Buyer:Purchase Request"
-				txList.Transactions = append(txList.Transactions, bidPrice)
+			case "issueHistoricalOrderInformation":
+				historicalorderInfo := proxy.DecodeHistoricalOrderInfotoString(resStrArray["issueHistoricalOrderInfo"], tx.Hash)
+				// bidPrice.Method = "Buyer:Purchase Request"
+				txList.Transactions = append(txList.Transactions, historicalorderInfo)
 
-			case "issueChannelSwitchInfo":
-				chSwitch := proxy.DecodeCStoString(resStrArray["issueChSwitch"], tx.Hash)
-				chSwitch.Method = "Seller:Willingness to sell"
-				txList.Transactions = append(txList.Transactions, chSwitch)
+			case "issueHistoricalUsedInformation":
+				historicalUsedinfo := proxy.DecodeHistoricalUsedInfotoString(resStrArray["issueHistoricalUsedInfo"], tx.Hash)
+				// chSwitch.Method = "Seller:Willingness to sell"
+				txList.Transactions = append(txList.Transactions, historicalUsedinfo)
 
-			case "issueChannelDealInfo":
-				chDeal := proxy.DecodeCDtoString(resStrArray["issueChDeal"], tx.Hash)
-				chDeal.Method = "Transaction Confirm"
-				txList.Transactions = append(txList.Transactions, chDeal)
+			case "issuePoolPlanInformation":
+				poolplanInfo := proxy.DecodePoolPlanInfotoString(resStrArray["issuePoolPlanInfo"], tx.Hash)
+				// chDeal.Method = "Transaction Confirm"
+				txList.Transactions = append(txList.Transactions, poolplanInfo)
+			case "issuePoolUsedInformation":
+				poolusedInfo := proxy.DecodePoolUsedInfotoString(resStrArray["issuePoolUsedInfo"], tx.Hash)
+				// chDeal.Method = "Transaction Confirm"
+				txList.Transactions = append(txList.Transactions, poolusedInfo)
 
-			case "queryAPChannelInfo":
-				fmt.Printf("%s : %s\n ", msgType, resStrArray["addr"])
-				query := new(proxy.QueryAPChannelInfo)
-				query.Method = "Update database"
-				query.TxHash = tx.Hash
-				query.APaddrStr = resStrArray["addr"]
+			// case "queryAPChannelInfo":
+			// 	fmt.Printf("%s : %s\n ", msgType, resStrArray["addr"])
+			// 	query := new(proxy.QueryAPChannelInfo)
+			// 	query.Method = "Update database"
+			// 	query.TxHash = tx.Hash
+			// 	query.APaddrStr = resStrArray["addr"]
 
-				txList.Transactions = append(txList.Transactions, query)
+			// 	txList.Transactions = append(txList.Transactions, query)
 
 			case "false":
 				fmt.Println("未识别的消息类型.......")

@@ -1,5 +1,27 @@
 package proxy
 
+type InvoiceInfo struct {
+	Method string `json:"method"`
+}
+type HistoricalSettleInfo struct {
+	Method string `json:"method"`
+}
+type HistoricalOrderInfo struct {
+	Method string `json:"method"`
+}
+type HistoricalUsedInfo struct {
+	Method string `json:"method"`
+}
+type HistoricalReceivableInfo struct {
+	Method string `json:"method"`
+}
+type PoolUsedInfo struct {
+	Method string `json:"method"`
+}
+type PoolPlanInfo struct {
+	Method string `json:"method"`
+}
+
 type APChannelInfo struct {
 	Method           string  `json:"method"`
 	TxHash           string  `json:"txHash"`
