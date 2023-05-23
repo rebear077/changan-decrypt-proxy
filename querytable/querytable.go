@@ -10,19 +10,44 @@ import (
 	"net/http/cookiejar"
 	"strconv"
 	"strings"
+	"time"
 
 	server "github.com/FISCO-BCOS/go-sdk/backend"
 	"github.com/FISCO-BCOS/go-sdk/conf"
 	"github.com/FISCO-BCOS/go-sdk/proxy"
 	sql "github.com/FISCO-BCOS/go-sdk/sqlController"
 	types "github.com/FISCO-BCOS/go-sdk/type"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type FrontEnd struct {
 	Server *server.Server
 	url    *conf.Config
 }
+
+type User struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Email    string `json:"email"`
+}
+
+// TokenResponse represents the response structure for token
+type TokenResponse struct {
+	Token string `json:"token"`
+}
+
+// JWTClaims represents the JWT claims
+type JWTClaims struct {
+	Username string `json:"username"`
+	jwt.StandardClaims
+}
+
+var jwtKey = []byte("your_secret_key")
+
+var users = make(map[string]User)
+var passwordResetTokens = make(map[string]time.Time)
 
 func NewFrontEnd() *FrontEnd {
 	server := server.NewServer()
@@ -124,67 +149,181 @@ func (front *FrontEnd) DecryptEnterPoolData(writer http.ResponseWriter, request 
 	fmt.Fprint(writer, jsonData)
 }
 
-// 融资意向
-func (front *FrontEnd) DecryptIntensionInformation(writer http.ResponseWriter, request *http.Request) {
-	order := make(map[string]string)
-	Sql := sql.NewSqlCtr()
-	slice := Sql.FinancingIntentionIndex(request)
-	order["id"] = slice.Id
-	order["financingId"] = slice.FinanceId
-	order["pageid"] = slice.PageId
-	currentPage, _ := strconv.Atoi(order["pageid"])
-	order["searchType"] = slice.SearchType
-	fmt.Println(order)
-	intensions, totalcount := front.Server.SearchIntensionFromRedis(order)
-	jsonData := front.Server.PackToIntensionJson(intensions, totalcount, currentPage)
-	fmt.Fprint(writer, jsonData)
+func (front *FrontEnd) HandleLogin(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		jsonResponse(w, http.StatusMethodNotAllowed, "方法不是Post")
+		return
+	}
+	DB := sql.NewSqlCtr()
+	var user User
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		jsonResponse(w, http.StatusBadRequest, "数据格式不对")
+		return
+	}
+
+	// Check if the user exists
+	// storedUser, ok := users[user.Username]
+	// if !ok {
+	// 	w.WriteHeader(http.StatusUnauthorized)
+	// 	jsonResponse(w, http.StatusUnauthorized, "用户名不存在")
+	// 	return
+	// }
+	exists, err := DB.CheckUsernameExists(user.Username)
+	if err != nil {
+		logrus.Errorln(err)
+	}
+	if !exists {
+		w.WriteHeader(http.StatusConflict)
+		jsonResponse(w, http.StatusConflict, "用户名不存在")
+		return
+	}
+
+	// Compare hashed password with the provided password
+	password, err := DB.GetPasswordByUsername(user.Username)
+	if err != nil {
+		logrus.Errorln(err)
+	}
+	if err := bcrypt.CompareHashAndPassword([]byte(password), []byte(user.Password)); err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		jsonResponse(w, http.StatusUnauthorized, "密码错误")
+		return
+	}
+
+	// Generate a JWT token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, JWTClaims{
+		Username: user.Username,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(20 * time.Second).Unix(),
+		},
+	})
+
+	// Sign the token with the secret key
+	tokenString, err := token.SignedString(jwtKey)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		jsonResponse(w, http.StatusInternalServerError, "")
+		return
+	}
+
+	// Send the token as response
+	response := TokenResponse{Token: tokenString}
+	jsonResponse(w, http.StatusOK, response)
 }
+
+func (front *FrontEnd) HandleProtected(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != http.MethodGet {
+		fmt.Println("00")
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		jsonResponse(w, http.StatusMethodNotAllowed, "方法不是Post")
+		return
+	}
+
+	// Read the token from the Authorization header
+	tokenString := r.Header.Get("Authorization")
+	if tokenString == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		jsonResponse(w, http.StatusUnauthorized, "Authorization字段不含token")
+		return
+	}
+	// fmt.Println(1)
+	claims := &JWTClaims{}
+
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
+	})
+
+	if err != nil {
+		if err == jwt.ErrSignatureInvalid {
+			w.WriteHeader(http.StatusUnauthorized)
+			jsonResponse(w, http.StatusUnauthorized, "jwt.ErrSignatureInvalid")
+			return
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		jsonResponse(w, http.StatusBadRequest, "token过期")
+		return
+	}
+	// fmt.Println(2)
+	if !token.Valid {
+		w.WriteHeader(http.StatusUnauthorized)
+		jsonResponse(w, http.StatusUnauthorized, "token失效")
+		return
+	}
+
+	// Token is valid, continue with protected logic
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("token验证成功，登录界面"))
+}
+
+func jsonResponse(w http.ResponseWriter, statusCode int, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(data)
+}
+
+// 融资意向
+// func (front *FrontEnd) DecryptIntensionInformation(writer http.ResponseWriter, request *http.Request) {
+// 	order := make(map[string]string)
+// 	Sql := sql.NewSqlCtr()
+// 	slice := Sql.FinancingIntentionIndex(request)
+// 	order["id"] = slice.Id
+// 	order["financingId"] = slice.FinanceId
+// 	order["pageid"] = slice.PageId
+// 	currentPage, _ := strconv.Atoi(order["pageid"])
+// 	order["searchType"] = slice.SearchType
+// 	fmt.Println(order)
+// 	intensions, totalcount := front.Server.SearchIntensionFromRedis(order)
+// 	jsonData := front.Server.PackToIntensionJson(intensions, totalcount, currentPage)
+// 	fmt.Fprint(writer, jsonData)
+// }
 
 // 回款账户
-func (front *FrontEnd) DecryptAccountInformation(writer http.ResponseWriter, request *http.Request) {
-	order := make(map[string]string)
-	Sql := sql.NewSqlCtr()
-	slice := Sql.CollectionAccountIndex(request)
-	order["id"] = slice.Id
-	order["financeId"] = slice.FinanceId
-	order["pageid"] = slice.PageId
-	currentPage, _ := strconv.Atoi(order["pageid"])
-	order["searchType"] = slice.SearchType
-	accounts, totalcount := front.Server.SearchAccountFromRedis(order)
-	jsonData := front.Server.PackToAccountJson(accounts, totalcount, currentPage)
-	fmt.Fprint(writer, jsonData)
-}
+// func (front *FrontEnd) DecryptAccountInformation(writer http.ResponseWriter, request *http.Request) {
+// 	order := make(map[string]string)
+// 	Sql := sql.NewSqlCtr()
+// 	slice := Sql.CollectionAccountIndex(request)
+// 	order["id"] = slice.Id
+// 	order["financeId"] = slice.FinanceId
+// 	order["pageid"] = slice.PageId
+// 	currentPage, _ := strconv.Atoi(order["pageid"])
+// 	order["searchType"] = slice.SearchType
+// 	accounts, totalcount := front.Server.SearchAccountFromRedis(order)
+// 	jsonData := front.Server.PackToAccountJson(accounts, totalcount, currentPage)
+// 	fmt.Fprint(writer, jsonData)
+// }
 
 // 借贷合同
-func (front *FrontEnd) DecryptFinancingContractInformation(writer http.ResponseWriter, request *http.Request) {
-	order := make(map[string]string)
-	Sql := sql.NewSqlCtr()
-	slice := Sql.FinancingContractIndex(request)
-	order["id"] = slice.Id
-	order["pageid"] = slice.PageId
-	currentPage, _ := strconv.Atoi(order["pageid"])
-	order["searchType"] = slice.SearchType
-	order["financeId"] = slice.FinanceId
-	contracts, totalcount := front.Server.SearchFinancingContractFromRedis(order)
-	jsonData := front.Server.PackToFinancingContractJson(contracts, totalcount, currentPage)
-	fmt.Fprint(writer, jsonData)
-}
+// func (front *FrontEnd) DecryptFinancingContractInformation(writer http.ResponseWriter, request *http.Request) {
+// 	order := make(map[string]string)
+// 	Sql := sql.NewSqlCtr()
+// 	slice := Sql.FinancingContractIndex(request)
+// 	order["id"] = slice.Id
+// 	order["pageid"] = slice.PageId
+// 	currentPage, _ := strconv.Atoi(order["pageid"])
+// 	order["searchType"] = slice.SearchType
+// 	order["financeId"] = slice.FinanceId
+// 	contracts, totalcount := front.Server.SearchFinancingContractFromRedis(order)
+// 	jsonData := front.Server.PackToFinancingContractJson(contracts, totalcount, currentPage)
+// 	fmt.Fprint(writer, jsonData)
+// }
 
 // 还款记录
-func (front *FrontEnd) DecryptRepaymentRecordInformation(writer http.ResponseWriter, request *http.Request) {
-	order := make(map[string]string)
-	Sql := sql.NewSqlCtr()
-	slice := Sql.RepaymentRecordIndex(request)
-	order["pageid"] = slice.PageId
-	currentPage, _ := strconv.Atoi(order["pageid"])
-	order["searchType"] = slice.SearchType
-	order["financeId"] = slice.FinanceId
-	order["id"] = slice.Id
-	fmt.Println(order)
-	records, totalcount := front.Server.SearchRepaymentRecordFromRedis(order)
-	jsonData := front.Server.PackToRepaymentRecordJson(records, totalcount, currentPage)
-	fmt.Fprint(writer, jsonData)
-}
+// func (front *FrontEnd) DecryptRepaymentRecordInformation(writer http.ResponseWriter, request *http.Request) {
+// 	order := make(map[string]string)
+// 	Sql := sql.NewSqlCtr()
+// 	slice := Sql.RepaymentRecordIndex(request)
+// 	order["pageid"] = slice.PageId
+// 	currentPage, _ := strconv.Atoi(order["pageid"])
+// 	order["searchType"] = slice.SearchType
+// 	order["financeId"] = slice.FinanceId
+// 	order["id"] = slice.Id
+// 	fmt.Println(order)
+// 	records, totalcount := front.Server.SearchRepaymentRecordFromRedis(order)
+// 	jsonData := front.Server.PackToRepaymentRecordJson(records, totalcount, currentPage)
+// 	fmt.Fprint(writer, jsonData)
+// }
 
 // 接口，负责发送勾选数据至其他服务端
 func handle(targetUrl string, targetJson string) SucessCode {

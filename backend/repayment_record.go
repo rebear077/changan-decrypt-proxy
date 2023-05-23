@@ -4,8 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strconv"
-	"time"
 
 	"github.com/FISCO-BCOS/go-sdk/redis"
 	"github.com/FISCO-BCOS/go-sdk/structure"
@@ -31,28 +29,28 @@ func (s *Server) StoreRepaymentRecordToRedis(records []*types.RepaymentRecord) {
 }
 
 // 根据指令从redis中查询发票信息
-func (s *Server) SearchRepaymentRecordFromRedis(order map[string]string) ([]*types.RepaymentRecord, int) {
-	pageid, err := strconv.ParseInt(order["pageid"], 10, 64)
-	if err != nil {
-		logrus.Errorln(err)
-		return nil, 0
-	}
-	records := s.searchRepaymentRecordByIDFromRedis(order["financeId"], order["searchType"])
-	//redis未命中
-	if len(records) == 0 {
-		//同步mysql到redis
-		s.DumpRepaymentRecordFromMysqlToRedis(order["financeId"])
-		time.Sleep(500 * time.Millisecond)
-		//二次查询
-		records := s.searchRepaymentRecordByIDFromRedis(order["financeId"], order["searchType"])
-		if len(records) == 0 {
-			return nil, 0
-		}
-	}
-	filterByPageId := s.filterByRepaymentRecordPageId(records, pageid)
-	totalcount := len(filterByPageId)
-	return filterByPageId, totalcount
-}
+// func (s *Server) SearchRepaymentRecordFromRedis(order map[string]string) ([]*types.RepaymentRecord, int) {
+// 	pageid, err := strconv.ParseInt(order["pageid"], 10, 64)
+// 	if err != nil {
+// 		logrus.Errorln(err)
+// 		return nil, 0
+// 	}
+// 	records := s.searchRepaymentRecordByIDFromRedis(order["financeId"], order["searchType"])
+// 	//redis未命中
+// 	if len(records) == 0 {
+// 		//同步mysql到redis
+// 		s.DumpRepaymentRecordFromMysqlToRedis(order["financeId"])
+// 		time.Sleep(500 * time.Millisecond)
+// 		//二次查询
+// 		records := s.searchRepaymentRecordByIDFromRedis(order["financeId"], order["searchType"])
+// 		if len(records) == 0 {
+// 			return nil, 0
+// 		}
+// 	}
+// 	filterByPageId := s.filterByRepaymentRecordPageId(records, pageid)
+// 	totalcount := len(filterByPageId)
+// 	return filterByPageId, totalcount
+// }
 
 // 根据id的信息从redis中查询数据，如果结构体是空的，那么说明redis未命中，需要去mysql数据库中查询
 func (s *Server) searchRepaymentRecordByIDFromRedis(id string, order string) []*types.RepaymentRecord {
@@ -105,11 +103,11 @@ func packToRepaymentRecordStruct(message map[string]string) *types.RepaymentReco
 
 // redis未命中的情况下，去查询数据库中的数据，这种情况只适用于指定了id的情况，如果id未指定，则直接从redis数据库中返回信息
 // 将mysql查询的数据首先存入redis，然后进行二次过滤
-func (s *Server) DumpRepaymentRecordFromMysqlToRedis(id string) {
-	rawRecords := s.sql.QueryRepaymentRecord(id)
-	records := s.sql.RepaymentRecordToMap(rawRecords)
-	s.StoreRepaymentRecordToRedis(records)
-}
+// func (s *Server) DumpRepaymentRecordFromMysqlToRedis(id string) {
+// 	rawRecords := s.sql.QueryRepaymentRecord(id)
+// 	records := s.sql.RepaymentRecordToMap(rawRecords)
+// 	s.StoreRepaymentRecordToRedis(records)
+// }
 
 func (s *Server) PackToRepaymentRecordJson(messages []*types.RepaymentRecord, totalcount, currentPage int) string {
 	returnresult := types.RepaymentRecordReturn{

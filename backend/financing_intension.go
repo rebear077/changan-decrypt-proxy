@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/FISCO-BCOS/go-sdk/redis"
 	types "github.com/FISCO-BCOS/go-sdk/type"
@@ -41,29 +40,29 @@ func (s *Server) StoreFinanacingIntensionToRedis(data []*types.FinancingIntentio
 }
 
 // 根据指令从redis中查询融资意向信息
-func (s *Server) SearchIntensionFromRedis(order map[string]string) ([]*types.FinancingIntention, int) {
-	pageid, err := strconv.ParseInt(order["pageid"], 10, 64)
-	if err != nil {
-		logrus.Errorln(err)
-		return nil, 0
-	}
-	intensions := s.searchIntensionByIDFromRedis(order["id"], order["searchType"])
-	//redis未命中
-	if len(intensions) == 0 {
-		//同步mysql到redis
-		s.DumpIntensionFromMysqlToRedis(order["id"])
-		time.Sleep(500 * time.Millisecond)
-		//二次查询
-		intensions = s.searchIntensionByIDFromRedis(order["id"], order["searchType"])
-		if len(intensions) == 0 {
-			return nil, 0
-		}
-	}
-	fliterByFinancingId := s.fliterByIntensionID(intensions, order["financingId"])
-	filterByPageId := s.filterByIntensionPageId(fliterByFinancingId, pageid)
-	totalcount := len(fliterByFinancingId)
-	return filterByPageId, totalcount
-}
+// func (s *Server) SearchIntensionFromRedis(order map[string]string) ([]*types.FinancingIntention, int) {
+// 	pageid, err := strconv.ParseInt(order["pageid"], 10, 64)
+// 	if err != nil {
+// 		logrus.Errorln(err)
+// 		return nil, 0
+// 	}
+// 	intensions := s.searchIntensionByIDFromRedis(order["id"], order["searchType"])
+// 	//redis未命中
+// 	if len(intensions) == 0 {
+// 		//同步mysql到redis
+// 		s.DumpIntensionFromMysqlToRedis(order["id"])
+// 		time.Sleep(500 * time.Millisecond)
+// 		//二次查询
+// 		intensions = s.searchIntensionByIDFromRedis(order["id"], order["searchType"])
+// 		if len(intensions) == 0 {
+// 			return nil, 0
+// 		}
+// 	}
+// 	fliterByFinancingId := s.fliterByIntensionID(intensions, order["financingId"])
+// 	filterByPageId := s.filterByIntensionPageId(fliterByFinancingId, pageid)
+// 	totalcount := len(fliterByFinancingId)
+// 	return filterByPageId, totalcount
+// }
 
 // 根据id的信息从redis中查询数据，如果结构体是空的，那么说明redis未命中，需要去mysql数据库中查询
 func (s *Server) searchIntensionByIDFromRedis(id string, order string) []*types.FinancingIntention {
@@ -140,11 +139,12 @@ func packToIntensionStruct(message map[string]string) *types.FinancingIntention 
 
 // redis未命中的情况下，去查询数据库中的数据，这种情况只适用于指定了id的情况，如果id未指定，则直接从redis数据库中返回信息
 // 将mysql查询的数据首先存入redis，然后进行二次过滤
-func (s *Server) DumpIntensionFromMysqlToRedis(id string) {
-	plaintext := s.sql.QueryFinancingIntention(id)
-	intensions := s.sql.IntensioninfoToMap(plaintext)
-	s.StoreFinanacingIntensionToRedis(intensions)
-}
+//
+//	func (s *Server) DumpIntensionFromMysqlToRedis(id string) {
+//		plaintext := s.sql.QueryFinancingIntention(id)
+//		intensions := s.sql.IntensioninfoToMap(plaintext)
+//		s.StoreFinanacingIntensionToRedis(intensions)
+//	}
 func (s *Server) PackToIntensionJson(messages []*types.FinancingIntention, totalcount, currentPage int) string {
 	returnresult := types.FinancingIntentionReturn{
 		FinancingIntentionList: messages,

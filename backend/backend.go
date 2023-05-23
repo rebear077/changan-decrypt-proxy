@@ -76,21 +76,21 @@ func (s *Server) ForceSynchronous() {
 	fmt.Println(enterpools)
 	s.StoreEnterPoolToRedis(enterpools)
 	//同步融资意向信息
-	plaintextIntension := s.sql.QueryFinancingIntention("")
-	intensions := s.sql.IntensioninfoToMap(plaintextIntension)
-	s.StoreFinanacingIntensionToRedis(intensions)
-	//同步回款账户信息
-	plaintextAccounts := s.sql.QueryCollectionAccount("")
-	accounts := s.sql.AccountinfoToMap(plaintextAccounts)
-	s.StoreAccountToRedis(accounts)
-	//同步借贷合同信息
-	plainContracts := s.sql.QueryFinancingContract("")
-	contracts := s.sql.FinancingContractToMap(plainContracts)
-	s.StoreFinancingContractToRedis(contracts)
-	//同步还款记录信息
-	repayRecord := s.sql.QueryRepaymentRecord("")
-	records := s.sql.RepaymentRecordToMap(repayRecord)
-	s.StoreRepaymentRecordToRedis(records)
+	// plaintextIntension := s.sql.QueryFinancingIntention("")
+	// intensions := s.sql.IntensioninfoToMap(plaintextIntension)
+	// s.StoreFinanacingIntensionToRedis(intensions)
+	// //同步回款账户信息
+	// plaintextAccounts := s.sql.QueryCollectionAccount("")
+	// accounts := s.sql.AccountinfoToMap(plaintextAccounts)
+	// s.StoreAccountToRedis(accounts)
+	// //同步借贷合同信息
+	// plainContracts := s.sql.QueryFinancingContract("")
+	// contracts := s.sql.FinancingContractToMap(plainContracts)
+	// s.StoreFinancingContractToRedis(contracts)
+	// //同步还款记录信息
+	// repayRecord := s.sql.QueryRepaymentRecord("")
+	// records := s.sql.RepaymentRecordToMap(repayRecord)
+	// s.StoreRepaymentRecordToRedis(records)
 }
 
 // ********************************************************************************************
@@ -108,18 +108,18 @@ func (s *Server) DumpFromCanal() {
 			delete(s.canal.RawData, s.tables.InvoiceInfos)
 			s.CannalStoreInvoiceToredis(messages)
 		}
-		if len(s.canal.RawData[s.tables.FinanceApplication]) != 0 {
-			messages := make([]*types.RawCanalData, 0)
-			messages = append(messages, s.canal.RawData[s.tables.FinanceApplication]...)
-			delete(s.canal.RawData, s.tables.FinanceApplication)
-			s.CannalStoreIntensionToredis(messages)
-		}
-		if len(s.canal.RawData[s.tables.Accounts]) != 0 {
-			messages := make([]*types.RawCanalData, 0)
-			messages = append(messages, s.canal.RawData[s.tables.Accounts]...)
-			delete(s.canal.RawData, s.tables.Accounts)
-			s.CannalStoreAccountsToredis(messages)
-		}
+		// if len(s.canal.RawData[s.tables.FinanceApplication]) != 0 {
+		// 	messages := make([]*types.RawCanalData, 0)
+		// 	messages = append(messages, s.canal.RawData[s.tables.FinanceApplication]...)
+		// 	delete(s.canal.RawData, s.tables.FinanceApplication)
+		// 	s.CannalStoreIntensionToredis(messages)
+		// }
+		// if len(s.canal.RawData[s.tables.Accounts]) != 0 {
+		// 	messages := make([]*types.RawCanalData, 0)
+		// 	messages = append(messages, s.canal.RawData[s.tables.Accounts]...)
+		// 	delete(s.canal.RawData, s.tables.Accounts)
+		// 	s.CannalStoreAccountsToredis(messages)
+		// }
 		if len(s.canal.RawData[s.tables.HistoricalOrder]) != 0 {
 			messages := make([]*types.RawCanalData, 0)
 			messages = append(messages, s.canal.RawData[s.tables.HistoricalOrder]...)
@@ -156,18 +156,18 @@ func (s *Server) DumpFromCanal() {
 			delete(s.canal.RawData, s.tables.PoolUsedInfos)
 			s.CannalStoreEnterPoolUsedToredis(messages)
 		}
-		if len(s.canal.RawData[s.tables.FinanceContract]) != 0 {
-			messages := make([]*types.RawCanalData, 0)
-			messages = append(messages, s.canal.RawData[s.tables.FinanceContract]...)
-			delete(s.canal.RawData, s.tables.FinanceContract)
-			s.CannalStoreFinancingContractToredis(messages)
-		}
-		if len(s.canal.RawData[s.tables.RepaymentRecord]) != 0 {
-			messages := make([]*types.RawCanalData, 0)
-			messages = append(messages, s.canal.RawData[s.tables.RepaymentRecord]...)
-			delete(s.canal.RawData, s.tables.RepaymentRecord)
-			s.CannalStoreRepaymentRecordToredis(messages)
-		}
+		// if len(s.canal.RawData[s.tables.FinanceContract]) != 0 {
+		// 	messages := make([]*types.RawCanalData, 0)
+		// 	messages = append(messages, s.canal.RawData[s.tables.FinanceContract]...)
+		// 	delete(s.canal.RawData, s.tables.FinanceContract)
+		// 	s.CannalStoreFinancingContractToredis(messages)
+		// }
+		// if len(s.canal.RawData[s.tables.RepaymentRecord]) != 0 {
+		// 	messages := make([]*types.RawCanalData, 0)
+		// 	messages = append(messages, s.canal.RawData[s.tables.RepaymentRecord]...)
+		// 	delete(s.canal.RawData, s.tables.RepaymentRecord)
+		// 	s.CannalStoreRepaymentRecordToredis(messages)
+		// }
 		s.canal.Lock.Unlock()
 	}
 }
@@ -180,23 +180,25 @@ func (s *Server) CannalStoreInvoiceToredis(datas []*types.RawCanalData) {
 		s.StoreInvoicesToRedis(invoices)
 	}
 }
-func (s *Server) CannalStoreAccountsToredis(datas []*types.RawCanalData) {
-	for _, data := range datas {
-		plaintext := s.sql.QueryCollectionAccountBySQLID(string(data.SQLId))
-		accounts := s.sql.AccountinfoToMap(plaintext)
-		s.StoreAccountToRedis(accounts)
-	}
-}
-func (s *Server) CannalStoreIntensionToredis(datas []*types.RawCanalData) {
-	fmt.Println("CannalStoreIntensionToredis")
-	for _, data := range datas {
-		plaintext := s.sql.QueryFinancingIntentionBySQLID(string(data.SQLId))
-		fmt.Println(plaintext)
-		intensions := s.sql.IntensioninfoToMap(plaintext)
-		fmt.Println(intensions)
-		s.StoreFinanacingIntensionToRedis(intensions)
-	}
-}
+
+//	func (s *Server) CannalStoreAccountsToredis(datas []*types.RawCanalData) {
+//		for _, data := range datas {
+//			plaintext := s.sql.QueryCollectionAccountBySQLID(string(data.SQLId))
+//			accounts := s.sql.AccountinfoToMap(plaintext)
+//			s.StoreAccountToRedis(accounts)
+//		}
+//	}
+//
+//	func (s *Server) CannalStoreIntensionToredis(datas []*types.RawCanalData) {
+//		fmt.Println("CannalStoreIntensionToredis")
+//		for _, data := range datas {
+//			plaintext := s.sql.QueryFinancingIntentionBySQLID(string(data.SQLId))
+//			fmt.Println(plaintext)
+//			intensions := s.sql.IntensioninfoToMap(plaintext)
+//			fmt.Println(intensions)
+//			s.StoreFinanacingIntensionToRedis(intensions)
+//		}
+//	}
 func (s *Server) CannalStoreHisUsedToredis(datas []*types.RawCanalData) {
 	for _, data := range datas {
 		use := s.sql.QueryHistoricalTransUsedInfosBySQLID(string(data.SQLId))
@@ -352,18 +354,18 @@ func (s *Server) CannalStoreEnterPoolUsedToredis(datas []*types.RawCanalData) {
 	}
 }
 
-func (s *Server) CannalStoreFinancingContractToredis(datas []*types.RawCanalData) {
-	for _, data := range datas {
-		rawContracts := s.sql.QueryFinancingContractBySQLID(string(data.SQLId))
-		contracts := s.sql.FinancingContractToMap(rawContracts)
-		s.StoreFinancingContractToRedis(contracts)
-	}
-}
-func (s *Server) CannalStoreRepaymentRecordToredis(datas []*types.RawCanalData) {
-	for _, data := range datas {
-		//TODO
-		rawRecord := s.sql.QueryRepaymentRecordBySQLID(string(data.SQLId))
-		records := s.sql.RepaymentRecordToMap(rawRecord)
-		s.StoreRepaymentRecordToRedis(records)
-	}
-}
+// func (s *Server) CannalStoreFinancingContractToredis(datas []*types.RawCanalData) {
+// 	for _, data := range datas {
+// 		rawContracts := s.sql.QueryFinancingContractBySQLID(string(data.SQLId))
+// 		contracts := s.sql.FinancingContractToMap(rawContracts)
+// 		s.StoreFinancingContractToRedis(contracts)
+// 	}
+// }
+// func (s *Server) CannalStoreRepaymentRecordToredis(datas []*types.RawCanalData) {
+// 	for _, data := range datas {
+// 		//TODO
+// 		rawRecord := s.sql.QueryRepaymentRecordBySQLID(string(data.SQLId))
+// 		records := s.sql.RepaymentRecordToMap(rawRecord)
+// 		s.StoreRepaymentRecordToRedis(records)
+// 	}
+// }

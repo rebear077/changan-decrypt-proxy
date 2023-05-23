@@ -2,6 +2,7 @@ package sql
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 
 	"github.com/FISCO-BCOS/go-sdk/conf"
@@ -29,12 +30,53 @@ func NewSqlCtr() *SqlCtr {
 	if err != nil {
 		logrus.Fatalln(err)
 	}
+	createTable(db)
 	de := NewDecrypter()
 	return &SqlCtr{
 		db:        db,
 		Decrypter: de,
 		orders:    config,
 	}
+}
+
+func createTable(db *sql.DB) {
+	_, err := db.Exec("CREATE TABLE IF NOT EXISTS `u_t_user`( `id` INT NOT NULL AUTO_INCREMENT, `user` varchar(1000), `password` varchar(100) not null, `email` varchar(1000) not null,  primary key (`id`) )ENGINE=InnoDB DEFAULT CHARSET=utf8;")
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+// func (d *SqlCtr) insertUser(username string, password string, email string) error {
+// 	stmt, err := d.db.Prepare("INSERT INTO u_t_user(user, password, email) VALUES(?, ?, ?)")
+// 	if err != nil {
+// 		return err
+// 	}
+// 	defer stmt.Close()
+
+// 	_, err = stmt.Exec(username, password, email)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	return nil
+// }
+
+func (d *SqlCtr) CheckUsernameExists(username string) (bool, error) {
+	var count int
+	err := d.db.QueryRow("SELECT COUNT(*) FROM u_t_user WHERE user = ?", username).Scan(&count)
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func (d *SqlCtr) GetPasswordByUsername(username string) (string, error) {
+	var password string
+	err := d.db.QueryRow("SELECT password FROM u_t_user WHERE user = ?", username).Scan(&password)
+	if err != nil {
+		return "", err
+	}
+	return password, nil
 }
 
 // //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -398,69 +440,69 @@ func (s *SqlCtr) QueryEnterpoolDataUsedInfosBySQLID(_id_ string) []string {
 
 // //////////////////////////////////////////////////////////////////////////////////////////////////////
 // 查询mysql数据库中融资意向信息，如果id为空，则查找全部的信息
-func (s *SqlCtr) QueryFinancingIntention(id string) []string {
-	var ret []string
-	if id == "" {
-		ret, _ = s.QueryFinancingByOrder(s.orders.FinancingSQLQueryAll)
-	} else {
-		ret, _ = s.QueryFinancingByOrder(s.orders.FinancingSQLQueryByID + id)
-	}
-	return ret
-}
-func (s *SqlCtr) QueryFinancingIntentionBySQLID(_id_ string) []string {
-	var ret []string
-	ret, _ = s.QueryFinancingByOrder(s.orders.FinancingSQLQueryBy_ID + _id_)
-	return ret
-}
+// func (s *SqlCtr) QueryFinancingIntention(id string) []string {
+// 	var ret []string
+// 	if id == "" {
+// 		ret, _ = s.QueryFinancingByOrder(s.orders.FinancingSQLQueryAll)
+// 	} else {
+// 		ret, _ = s.QueryFinancingByOrder(s.orders.FinancingSQLQueryByID + id)
+// 	}
+// 	return ret
+// }
+// func (s *SqlCtr) QueryFinancingIntentionBySQLID(_id_ string) []string {
+// 	var ret []string
+// 	ret, _ = s.QueryFinancingByOrder(s.orders.FinancingSQLQueryBy_ID + _id_)
+// 	return ret
+// }
 
 // //////////////////////////////////////////////////////////////////////////////
 // 查询mysql数据库中回款账户信息，如果id为空，则查找全部的信息
-func (s *SqlCtr) QueryCollectionAccount(id string) []string {
-	var ret []string
-	if id == "" {
-		ret, _ = s.QueryAccountsByOrder(s.orders.AccountsSQLQueryAll)
-	} else {
-		ret, _ = s.QueryAccountsByOrder(s.orders.AccountsSQLQueryByID + id)
-	}
-	return ret
-}
-func (s *SqlCtr) QueryCollectionAccountBySQLID(_id_ string) []string {
-	var ret []string
-	ret, _ = s.QueryAccountsByOrder(s.orders.AccountsSQLQueryBy_ID + _id_)
-	return ret
-}
+// func (s *SqlCtr) QueryCollectionAccount(id string) []string {
+// 	var ret []string
+// 	if id == "" {
+// 		ret, _ = s.QueryAccountsByOrder(s.orders.AccountsSQLQueryAll)
+// 	} else {
+// 		ret, _ = s.QueryAccountsByOrder(s.orders.AccountsSQLQueryByID + id)
+// 	}
+// 	return ret
+// }
+// func (s *SqlCtr) QueryCollectionAccountBySQLID(_id_ string) []string {
+// 	var ret []string
+// 	ret, _ = s.QueryAccountsByOrder(s.orders.AccountsSQLQueryBy_ID + _id_)
+// 	return ret
+// }
 
 // //////////////////////////////////////////////////////////////////////////////////
-func (s *SqlCtr) QueryFinancingContract(id string) []*types.RawFinancingContractData {
-	var ret []*types.RawFinancingContractData
-	if id == "" {
-		ret, _ = s.QueryFinancingContractByOrder(s.orders.FinancingContractSQLAll)
-	} else {
-		ret, _ = s.QueryFinancingContractByOrder(s.orders.FinancingContractSQLByID + id)
-	}
-	return ret
-}
-func (s *SqlCtr) QueryFinancingContractBySQLID(_id_ string) []*types.RawFinancingContractData {
-	var ret []*types.RawFinancingContractData
-	ret, _ = s.QueryFinancingContractByOrder(s.orders.FinancingContractSQLBy_ID + _id_)
-	return ret
-}
+// func (s *SqlCtr) QueryFinancingContract(id string) []*types.RawFinancingContractData {
+// 	var ret []*types.RawFinancingContractData
+// 	if id == "" {
+// 		ret, _ = s.QueryFinancingContractByOrder(s.orders.FinancingContractSQLAll)
+// 	} else {
+// 		ret, _ = s.QueryFinancingContractByOrder(s.orders.FinancingContractSQLByID + id)
+// 	}
+// 	return ret
+// }
+// func (s *SqlCtr) QueryFinancingContractBySQLID(_id_ string) []*types.RawFinancingContractData {
+// 	var ret []*types.RawFinancingContractData
+// 	ret, _ = s.QueryFinancingContractByOrder(s.orders.FinancingContractSQLBy_ID + _id_)
+// 	return ret
+// }
 
 // //////////////////////////////////////////////////////////////////////////////////////////
-func (s *SqlCtr) QueryRepaymentRecord(id string) []*types.RawRepaymentRecord {
-	var ret []*types.RawRepaymentRecord
-	if id == "" {
-		ret, _ = s.QueryRepaymentRecordByOrder(s.orders.RepaymentRecordSQLAll)
-	} else {
-		ret, _ = s.QueryRepaymentRecordByOrder(s.orders.RepaymentRecordSQLByID + id)
-	}
-	return ret
-}
-func (s *SqlCtr) QueryRepaymentRecordBySQLID(_id_ string) []*types.RawRepaymentRecord {
-	var ret []*types.RawRepaymentRecord
-	ret, _ = s.QueryRepaymentRecordByOrder(s.orders.RepaymentRecordSQLBy_ID + _id_)
-	return ret
-}
+// func (s *SqlCtr) QueryRepaymentRecord(id string) []*types.RawRepaymentRecord {
+// 	var ret []*types.RawRepaymentRecord
+// 	if id == "" {
+// 		ret, _ = s.QueryRepaymentRecordByOrder(s.orders.RepaymentRecordSQLAll)
+// 	} else {
+// 		ret, _ = s.QueryRepaymentRecordByOrder(s.orders.RepaymentRecordSQLByID + id)
+// 	}
+// 	return ret
+// }
+// func (s *SqlCtr) QueryRepaymentRecordBySQLID(_id_ string) []*types.RawRepaymentRecord {
+// 	var ret []*types.RawRepaymentRecord
+// 	ret, _ = s.QueryRepaymentRecordByOrder(s.orders.RepaymentRecordSQLBy_ID + _id_)
+// 	return ret
+// }
 
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 查询解密发票信息
@@ -581,131 +623,131 @@ func (s *SqlCtr) QueryPoolDataByOrder(order string) ([]string, error) {
 	return ret, nil
 }
 
-// 查询解密融资意向申请
-func (s *SqlCtr) QueryFinancingByOrder(order string) ([]string, error) {
-	in_stmt, err := s.db.Prepare(order)
-	if err != nil {
-		return nil, err
-	}
-	rows, err := in_stmt.Query()
-	if err != nil {
-		return nil, err
-	}
-	ret := make([]string, 0)
-	count := 0
-	i := 0
-	for rows.Next() {
-		record := &types.RawFinancingData{}
-		err = rows.Scan(&record.SQLId, &record.Num, &record.Status, &record.ID, &record.FinanceId, &record.CustomerId, &record.Data, &record.Key, &record.Hash, &record.State)
-		if err != nil {
-			logrus.Errorln(err)
-			count++
-			continue
-		}
-		symkey, err := s.Decrypter.DecryptSymkey([]byte(record.Key))
-		if err != nil {
-			logrus.Errorln("利用私钥解密对称密钥失败")
-		}
-		data, err := s.Decrypter.DecryptData(record.Data, symkey)
-		if err != nil {
-			logrus.Errorln("利用对称密钥解密数据失败")
-		}
-		if s.Decrypter.ValidateHash([]byte(record.Hash), data) {
-			data = []byte(string(data) + "," + record.State)
-			ret = append(ret, string(data))
-		} else {
-			logrus.Errorln("哈希值与数据对应错误")
-		}
-		i = i + 1
+// // 查询解密融资意向申请
+// func (s *SqlCtr) QueryFinancingByOrder(order string) ([]string, error) {
+// 	in_stmt, err := s.db.Prepare(order)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	rows, err := in_stmt.Query()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	ret := make([]string, 0)
+// 	count := 0
+// 	i := 0
+// 	for rows.Next() {
+// 		record := &types.RawFinancingData{}
+// 		err = rows.Scan(&record.SQLId, &record.Num, &record.Status, &record.ID, &record.FinanceId, &record.CustomerId, &record.Data, &record.Key, &record.Hash, &record.State)
+// 		if err != nil {
+// 			logrus.Errorln(err)
+// 			count++
+// 			continue
+// 		}
+// 		symkey, err := s.Decrypter.DecryptSymkey([]byte(record.Key))
+// 		if err != nil {
+// 			logrus.Errorln("利用私钥解密对称密钥失败")
+// 		}
+// 		data, err := s.Decrypter.DecryptData(record.Data, symkey)
+// 		if err != nil {
+// 			logrus.Errorln("利用对称密钥解密数据失败")
+// 		}
+// 		if s.Decrypter.ValidateHash([]byte(record.Hash), data) {
+// 			data = []byte(string(data) + "," + record.State)
+// 			ret = append(ret, string(data))
+// 		} else {
+// 			logrus.Errorln("哈希值与数据对应错误")
+// 		}
+// 		i = i + 1
 
-	}
-	return ret, nil
-}
+// 	}
+// 	return ret, nil
+// }
 
-// 输入命令，比如“select * from u_t_push_payment_accounts”,查询出加密后的密文然后自动解密，返回明文[]string
-func (s *SqlCtr) QueryAccountsByOrder(order string) ([]string, error) {
-	in_stmt, err := s.db.Prepare(order)
-	if err != nil {
-		return nil, err
-	}
-	rows, err := in_stmt.Query()
-	if err != nil {
-		return nil, err
-	}
-	ret := make([]string, 0)
-	count := 0
-	i := 0
-	for rows.Next() {
-		record := &types.RawAccountsData{}
-		err = rows.Scan(&record.SQLId, &record.Num, &record.Status, &record.ID, &record.FinanceID, &record.Data, &record.Key, &record.Hash, &record.State)
-		if err != nil {
-			logrus.Errorln(err)
-			count++
-			continue
-		}
-		symkey, err := s.Decrypter.DecryptSymkey([]byte(record.Key))
-		if err != nil {
-			logrus.Errorln("利用私钥解密对称密钥失败")
-		}
-		data, err := s.Decrypter.DecryptData(record.Data, symkey)
-		if err != nil {
-			logrus.Errorln("利用对称密钥解密数据失败")
-		}
-		if s.Decrypter.ValidateHash([]byte(record.Hash), data) {
-			ret = append(ret, string(data))
-		} else {
-			logrus.Errorln("哈希值与数据对应错误")
-		}
-		i = i + 1
-	}
-	return ret, nil
-}
+// // 输入命令，比如“select * from u_t_push_payment_accounts”,查询出加密后的密文然后自动解密，返回明文[]string
+// func (s *SqlCtr) QueryAccountsByOrder(order string) ([]string, error) {
+// 	in_stmt, err := s.db.Prepare(order)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	rows, err := in_stmt.Query()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	ret := make([]string, 0)
+// 	count := 0
+// 	i := 0
+// 	for rows.Next() {
+// 		record := &types.RawAccountsData{}
+// 		err = rows.Scan(&record.SQLId, &record.Num, &record.Status, &record.ID, &record.FinanceID, &record.Data, &record.Key, &record.Hash, &record.State)
+// 		if err != nil {
+// 			logrus.Errorln(err)
+// 			count++
+// 			continue
+// 		}
+// 		symkey, err := s.Decrypter.DecryptSymkey([]byte(record.Key))
+// 		if err != nil {
+// 			logrus.Errorln("利用私钥解密对称密钥失败")
+// 		}
+// 		data, err := s.Decrypter.DecryptData(record.Data, symkey)
+// 		if err != nil {
+// 			logrus.Errorln("利用对称密钥解密数据失败")
+// 		}
+// 		if s.Decrypter.ValidateHash([]byte(record.Hash), data) {
+// 			ret = append(ret, string(data))
+// 		} else {
+// 			logrus.Errorln("哈希值与数据对应错误")
+// 		}
+// 		i = i + 1
+// 	}
+// 	return ret, nil
+// }
 
-// 输入命令，比如“select * from u_t_push_payment_accounts”,
-func (s *SqlCtr) QueryFinancingContractByOrder(order string) ([]*types.RawFinancingContractData, error) {
-	in_stmt, err := s.db.Prepare(order)
-	if err != nil {
-		return nil, err
-	}
-	rows, err := in_stmt.Query()
-	if err != nil {
-		return nil, err
-	}
-	ret := make([]*types.RawFinancingContractData, 0)
-	count := 0
-	for rows.Next() {
-		record := &types.RawFinancingContractData{}
-		err = rows.Scan(&record.SQLId, &record.Num, &record.Status, &record.ID, &record.FinancingID, &record.CustomerID, &record.CorpName, &record.DebtMoney, &record.SupplyDate, &record.ExpireDate, &record.Balance)
-		if err != nil {
-			logrus.Errorln(err)
-			count++
-			continue
-		}
-		ret = append(ret, record)
-	}
-	return ret, nil
-}
+// // 输入命令，比如“select * from u_t_push_payment_accounts”,
+// func (s *SqlCtr) QueryFinancingContractByOrder(order string) ([]*types.RawFinancingContractData, error) {
+// 	in_stmt, err := s.db.Prepare(order)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	rows, err := in_stmt.Query()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	ret := make([]*types.RawFinancingContractData, 0)
+// 	count := 0
+// 	for rows.Next() {
+// 		record := &types.RawFinancingContractData{}
+// 		err = rows.Scan(&record.SQLId, &record.Num, &record.Status, &record.ID, &record.FinancingID, &record.CustomerID, &record.CorpName, &record.DebtMoney, &record.SupplyDate, &record.ExpireDate, &record.Balance)
+// 		if err != nil {
+// 			logrus.Errorln(err)
+// 			count++
+// 			continue
+// 		}
+// 		ret = append(ret, record)
+// 	}
+// 	return ret, nil
+// }
 
-func (s *SqlCtr) QueryRepaymentRecordByOrder(order string) ([]*types.RawRepaymentRecord, error) {
-	in_stmt, err := s.db.Prepare(order)
-	if err != nil {
-		return nil, err
-	}
-	rows, err := in_stmt.Query()
-	if err != nil {
-		return nil, err
-	}
-	ret := make([]*types.RawRepaymentRecord, 0)
-	count := 0
-	for rows.Next() {
-		record := &types.RawRepaymentRecord{}
-		err = rows.Scan(&record.SQLId, &record.Num, &record.Status, &record.ID, &record.FinancingID, &record.CustomerID, &record.Repay, &record.Time)
-		if err != nil {
-			logrus.Errorln(err)
-			count++
-			continue
-		}
-		ret = append(ret, record)
-	}
-	return ret, nil
-}
+// func (s *SqlCtr) QueryRepaymentRecordByOrder(order string) ([]*types.RawRepaymentRecord, error) {
+// 	in_stmt, err := s.db.Prepare(order)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	rows, err := in_stmt.Query()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	ret := make([]*types.RawRepaymentRecord, 0)
+// 	count := 0
+// 	for rows.Next() {
+// 		record := &types.RawRepaymentRecord{}
+// 		err = rows.Scan(&record.SQLId, &record.Num, &record.Status, &record.ID, &record.FinancingID, &record.CustomerID, &record.Repay, &record.Time)
+// 		if err != nil {
+// 			logrus.Errorln(err)
+// 			count++
+// 			continue
+// 		}
+// 		ret = append(ret, record)
+// 	}
+// 	return ret, nil
+// }
